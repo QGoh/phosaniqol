@@ -1,34 +1,28 @@
 package com.phosaniqol;
 
-import java.awt.Color;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.NPC;
 
 @Getter
 @Setter
-public class PhosaniPhase extends PhosaniNpc
+public class PhosaniBoss extends PhosaniNpc
 {
-	private int phase;
 	private int shield;
 
-	public PhosaniPhase(NPC npc, int phase, int shield, PhosaniQolConfig config)
+	public PhosaniBoss(NPC npc, int shield, PhosaniQolConfig config)
 	{
 		super.setNpc(npc);
-		this.phase = phase;
 		this.shield = shield;
 		setHighlightConfig(config);
 	}
 
 	public void setHighlightConfig(PhosaniQolConfig config)
 	{
-		Color color = (phase == 0) ? config.parasitePhaseColor()
-			: (phase == 1) ? config.huskPhaseColor()
-			: null;
 		super.setHighlightConfig(
-			(config.phosaniPhaseColors() && phase > -1) ? PhosaniQolConfig.HighlightStyle.TILE : PhosaniQolConfig.HighlightStyle.NONE,
-			config.phosaniBorderWidth(),
-			color,
+			null,
+			null,
+			null,
 			null,
 			config.phosaniShieldOverlay(),
 			config.phosaniShieldOverlayFont().getFont(),

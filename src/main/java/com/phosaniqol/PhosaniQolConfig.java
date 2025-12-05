@@ -133,56 +133,6 @@ public interface PhosaniQolConfig extends Config
 
 	@ConfigItem(
 		position = 0,
-		keyName = "phosaniPhaseColors",
-		name = "Highlight Phases",
-		description = "Highlight phosani with a color corresponding to the special attack she will use in each phase",
-		section = bossSettings
-	)
-	default boolean phosaniPhaseColors()
-	{
-		return true;
-	}
-
-	@ConfigItem(
-		position = 1,
-		keyName = "phosaniBorderWidth",
-		name = "Border Width",
-		description = "Sets the width of the lines highlighting charged totems.",
-		section = bossSettings
-	)
-	default double phosaniBorderWidth()
-	{
-		return 1.0;
-	}
-
-	@Alpha
-	@ConfigItem(
-		position = 2,
-		keyName = "parasitePhaseColor",
-		name = "Parasite Phase Color",
-		description = "Sets the color to use for highlighting Phosani's parasite phase",
-		section = bossSettings
-	)
-	default Color parasitePhaseColor()
-	{
-		return new Color(132, 0, 255);
-	}
-
-	@Alpha
-	@ConfigItem(
-		position = 3,
-		keyName = "huskPhaseColor",
-		name = "Husk Phase Color",
-		description = "Sets the color to use for highlighting Phosani's husk phase",
-		section = bossSettings
-	)
-	default Color huskPhaseColor()
-	{
-		return new Color(0, 47, 255);
-	}
-
-	@ConfigItem(
-		position = 4,
 		keyName = "phosaniShieldOverlay",
 		name = "Shield Overlay",
 		description = "Draws an overlay over Phosani showing her current shield amount",
@@ -194,7 +144,7 @@ public interface PhosaniQolConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 5,
+		position = 1,
 		keyName = "phosaniShieldOverlayFont",
 		name = "Overlay Font",
 		description = "Sets the font to use for drawing Phosani's shield overlay",
@@ -206,7 +156,7 @@ public interface PhosaniQolConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 6,
+		position = 2,
 		keyName = "phosaniShieldOverlayOffset",
 		name = "Overlay Z-Offset",
 		description = "Sets the z-offset for drawing Phosani's shield overlay",
@@ -219,7 +169,7 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 7,
+		position = 3,
 		keyName = "phosaniShieldOverlayColor",
 		name = "Overlay Color",
 		description = "Sets the color to use for drawing Phosani's shield overlay",
@@ -231,10 +181,10 @@ public interface PhosaniQolConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 8,
+		position = 4,
 		keyName = "hideHealthOverlay",
 		name = "Hide Jagex HP HUD",
-		description = "Force hides Jagex's boss health HUD since it shows up even when the in-game setting is disabled",
+		description = "Force hides the in-game boss HP HUD",
 		section = bossSettings
 	)
 	default boolean hideHealthOverlay()
@@ -300,18 +250,6 @@ public interface PhosaniQolConfig extends Config
 
 	@ConfigItem(
 		position = 4,
-		keyName = "highlightSpores",
-		name = "Highlight Spores",
-		description = "Sets the highlight style for spores",
-		section = addsSettings
-	)
-	default HighlightStyle highlightSpores()
-	{
-		return HighlightStyle.TILE;
-	}
-
-	@ConfigItem(
-		position = 5,
 		keyName = "addsBorderWidth",
 		name = "Border Width",
 		description = "Sets the width of the lines highlighting adds.",
@@ -324,7 +262,7 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 6,
+		position = 5,
 		keyName = "addsBorderColor",
 		name = "Border Color",
 		description = "Sets the border color highlighting adds",
@@ -337,7 +275,7 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 7,
+		position = 6,
 		keyName = "addsFillColor",
 		name = "Fill Color",
 		description = "Sets the fill color for highlighting adds",

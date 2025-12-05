@@ -13,7 +13,7 @@ public class PhosaniNpc
 	private NPC npc;
 
 	private PhosaniQolConfig.HighlightStyle highlightStyle;
-	private double borderWidth;
+	private Double borderWidth;
 	private Color borderColor;
 	private Color fillColor;
 
@@ -22,7 +22,7 @@ public class PhosaniNpc
 	private int textOverlayOffset;
 	private Color textOverlayColor;
 
-	public void setHighlightConfig(PhosaniQolConfig.HighlightStyle highlightStyle, double borderWidth, Color borderColor, Color fillColor,
+	public void setHighlightConfig(PhosaniQolConfig.HighlightStyle highlightStyle, Double borderWidth, Color borderColor, Color fillColor,
 								   boolean textOverlay, Font textOverlayFont, int textOverlayOffset, Color textColor)
 	{
 		this.highlightStyle = highlightStyle;

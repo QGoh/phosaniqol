@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.util.ArrayList;
 import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -42,17 +41,14 @@ public class PhosaniQolOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		PhosaniPhase phosani = plugin.getPhosani();
-		highlightNpc(graphics2D, phosani);
+		PhosaniBoss phosaniBoss = plugin.getPhosaniBoss();
+		highlightNpc(graphics2D, phosaniBoss);
 
 		Map<Integer, PhosaniTotem> totems = plugin.getTotems();
 		totems.forEach((npcId, totem) -> highlightNpc(graphics2D, totem));
 
 		Map<Integer, PhosaniAdd> adds = plugin.getAdds();
 		adds.forEach((npcId, add) -> highlightNpc(graphics2D, add));
-
-		ArrayList<PhosaniObject> spores = plugin.getSpores();
-		spores.forEach((object) -> highlightNpc(graphics2D, object));
 
 		return null;
 	}
@@ -76,9 +72,10 @@ public class PhosaniQolOverlay extends Overlay
 			{
 				text = String.valueOf(((PhosaniTotem) phosaniNpc).getCharge());
 			}
-			else if (phosaniNpc instanceof PhosaniPhase)
+			else if (phosaniNpc instanceof PhosaniBoss)
 			{
-				int shield = ((PhosaniPhase) phosaniNpc).getShield();
+				int shield = ((PhosaniBoss) phosaniNpc).getShield();
+				//log.info("BOSS OVERLAY " + npc.getId() + " " + npc.getName() + " " + shield);
 				text = (shield > 0) ? String.valueOf(shield) : null;
 			}
 			if (text != null)
@@ -104,11 +101,7 @@ public class PhosaniQolOverlay extends Overlay
 
 		LocalPoint localPoint;
 		int size = 3;
-		if (phosaniNpc instanceof PhosaniObject)
-		{
-			localPoint = ((PhosaniObject) phosaniNpc).getGameObject().getLocalLocation();
-		}
-		else if (npc != null)
+		if (npc != null)
 		{
 			localPoint = npc.getLocalLocation();
 			size = npc.getComposition().getSize();
@@ -121,7 +114,7 @@ public class PhosaniQolOverlay extends Overlay
 		PhosaniQolConfig.HighlightStyle highlightStyle = phosaniNpc.getHighlightStyle();
 		Color borderColor = phosaniNpc.getBorderColor();
 		Color fillColor = phosaniNpc.getFillColor();
-		double width = phosaniNpc.getBorderWidth();
+		Double width = phosaniNpc.getBorderWidth();
 
 		Shape shape = null;
 		if (highlightStyle == PhosaniQolConfig.HighlightStyle.TILE)
@@ -130,44 +123,23 @@ public class PhosaniQolOverlay extends Overlay
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.HULL)
 		{
-			if (phosaniNpc instanceof PhosaniObject)
-			{
-				shape = ((PhosaniObject) phosaniNpc).getGameObject().getConvexHull();
-			}
-			else
-			{
-				shape = npc.getConvexHull();
-			}
+			shape = npc.getConvexHull();
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.CLICKBOX)
 		{
-			if (phosaniNpc instanceof PhosaniObject)
-			{
-				shape = ((PhosaniObject) phosaniNpc).getGameObject().getClickbox();
-			}
-			else
-			{
-				shape = Perspective.getClickbox(client, client.getTopLevelWorldView(), npc.getModel(), npc.getCurrentOrientation(), localPoint.getX(), localPoint.getY(),
-					Perspective.getTileHeight(client, localPoint, npc.getWorldLocation().getPlane()));
-			}
+			shape = Perspective.getClickbox(client, client.getTopLevelWorldView(), npc.getModel(), npc.getCurrentOrientation(), localPoint.getX(), localPoint.getY(),
+				Perspective.getTileHeight(client, localPoint, npc.getWorldLocation().getPlane()));
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.OUTLINE)
 		{
-			if (phosaniNpc instanceof PhosaniObject)
-			{
-				renderer.drawOutline(((PhosaniObject) phosaniNpc).getGameObject(), (int) width, borderColor, 5);
-			}
-			else
-			{
-				renderer.drawOutline(npc, (int) width, borderColor, 5);
-			}
+			renderer.drawOutline(npc, (int) width.intValue(), borderColor, 5);
 		}
 
 		if (shape != null)
 		{
 			graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			graphics2D.setColor(borderColor);
-			graphics2D.setStroke(new BasicStroke((float) width));
+			graphics2D.setStroke(new BasicStroke((float) width.floatValue()));
 			graphics2D.draw(shape);
 			if (fillColor != null)
 			{
