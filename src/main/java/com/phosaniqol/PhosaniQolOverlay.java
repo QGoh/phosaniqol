@@ -45,7 +45,13 @@ public class PhosaniQolOverlay extends Overlay
 		highlightNpc(graphics2D, phosaniBoss);
 
 		Map<Integer, PhosaniTotem> totems = plugin.getTotems();
-		totems.forEach((npcId, totem) -> highlightNpc(graphics2D, totem));
+		totems.forEach((npcId, totem) ->
+		{
+			if (plugin.getREADY_TOTEMS().contains(npcId))
+			{
+				highlightNpc(graphics2D, totem);
+			}
+		});
 
 		Map<Integer, PhosaniAdd> adds = plugin.getAdds();
 		adds.forEach((npcId, add) -> highlightNpc(graphics2D, add));
@@ -122,7 +128,7 @@ public class PhosaniQolOverlay extends Overlay
 		}
 
 		LocalPoint localPoint;
-		int size = 3;
+		int size;
 		if (npc != null)
 		{
 			localPoint = npc.getLocalLocation();
@@ -154,14 +160,14 @@ public class PhosaniQolOverlay extends Overlay
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.OUTLINE)
 		{
-			renderer.drawOutline(npc, (int) width.intValue(), borderColor, 5);
+			renderer.drawOutline(npc, width.intValue(), borderColor, 5);
 		}
 
 		if (shape != null)
 		{
 			graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			graphics2D.setColor(borderColor);
-			graphics2D.setStroke(new BasicStroke((float) width.floatValue()));
+			graphics2D.setStroke(new BasicStroke(width.floatValue()));
 			graphics2D.draw(shape);
 			if (fillColor != null)
 			{

@@ -1,6 +1,5 @@
 package com.phosaniqol;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
-import net.runelite.api.WorldView;
 import net.runelite.api.events.FakeXpDrop;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.HitsplatApplied;
@@ -52,6 +50,7 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_TOTEM_4_DORMANT
 	);
 
+	@Getter
 	private final Set<Integer> READY_TOTEMS = ImmutableSet.of(
 		NpcID.NIGHTMARE_TOTEM_1_READY,
 		NpcID.NIGHTMARE_TOTEM_2_READY,
