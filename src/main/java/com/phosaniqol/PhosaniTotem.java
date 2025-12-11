@@ -24,7 +24,7 @@ public class PhosaniTotem extends PhosaniNpc
 			config.chargedBorderWidth(),
 			config.chargedBorderColor(),
 			config.chargedFillColor(),
-			charge >= 0 && config.totemChargeOverlay(),
+			config.totemChargeOverlay(),
 			config.totemChargeOverlayFont().getFont(),
 			config.totemChargeOverlayOffset(),
 			config.totemChargeOverlayColor()

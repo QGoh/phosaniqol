@@ -62,7 +62,7 @@ public class PhosaniQolOverlay extends Overlay
 
 		NPC npc = phosaniNpc.getNpc();
 
-		if (phosaniNpc.isTextOverlay() && npc != null)
+		if (phosaniNpc.getTextOverlay() != PhosaniQolConfig.OverlayType.NONE && npc != null)
 		{
 			String text = null;
 			Color textOverlayColor = phosaniNpc.getTextOverlayColor();
@@ -70,13 +70,35 @@ public class PhosaniQolOverlay extends Overlay
 			int textOverlayOffset = phosaniNpc.getTextOverlayOffset();
 			if (phosaniNpc instanceof PhosaniTotem)
 			{
-				text = String.valueOf(((PhosaniTotem) phosaniNpc).getCharge());
+				int charge = ((PhosaniTotem) phosaniNpc).getCharge();
+				if (charge >= 0)
+				{
+					if (phosaniNpc.getTextOverlay() == PhosaniQolConfig.OverlayType.PERCENTAGE)
+					{
+						charge = charge / 2;
+						text = charge + "%";
+					}
+					else
+					{
+						text = String.valueOf(charge);
+					}
+				}
 			}
 			else if (phosaniNpc instanceof PhosaniBoss)
 			{
 				int shield = ((PhosaniBoss) phosaniNpc).getShield();
-				//log.info("BOSS OVERLAY " + npc.getId() + " " + npc.getName() + " " + shield);
-				text = (shield > 0) ? String.valueOf(shield) : null;
+				if (shield > 0)
+				{
+					if (phosaniNpc.getTextOverlay() == PhosaniQolConfig.OverlayType.PERCENTAGE)
+					{
+						shield = (npc.getHealthRatio() * 100) / npc.getHealthScale();
+						text = shield + "%";
+					}
+					else
+					{
+						text = String.valueOf(shield);
+					}
+				}
 			}
 			if (text != null)
 			{

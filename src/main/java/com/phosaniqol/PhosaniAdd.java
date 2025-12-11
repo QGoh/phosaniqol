@@ -32,7 +32,7 @@ public class PhosaniAdd extends PhosaniNpc
 			config.addsBorderWidth(),
 			config.addsBorderColor(),
 			config.addsFillColor(),
-			false,
+			PhosaniQolConfig.OverlayType.NONE,
 			null,
 			0,
 			null

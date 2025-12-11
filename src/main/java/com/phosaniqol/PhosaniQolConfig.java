@@ -81,9 +81,9 @@ public interface PhosaniQolConfig extends Config
 		description = "Draws an overlay over totems showing their current charge",
 		section = totemSettings
 	)
-	default boolean totemChargeOverlay()
+	default OverlayType totemChargeOverlay()
 	{
-		return true;
+		return OverlayType.NONE;
 	}
 
 	@ConfigItem(
@@ -138,9 +138,9 @@ public interface PhosaniQolConfig extends Config
 		description = "Draws an overlay over Phosani showing her current shield amount",
 		section = bossSettings
 	)
-	default boolean phosaniShieldOverlay()
+	default OverlayType phosaniShieldOverlay()
 	{
-		return true;
+		return OverlayType.NONE;
 	}
 
 	@ConfigItem(
@@ -308,5 +308,16 @@ public interface PhosaniQolConfig extends Config
 		BOLD(FontManager.getRunescapeBoldFont());
 
 		private final Font font;
+	}
+
+	@Getter
+	@RequiredArgsConstructor
+	enum OverlayType
+	{
+		NONE("None"),
+		VALUE("Value"),
+		PERCENTAGE("Percentage");
+
+		private final String overlayType;
 	}
 }

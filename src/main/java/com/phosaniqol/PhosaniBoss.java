@@ -16,7 +16,7 @@ public class PhosaniBoss extends PhosaniNpc
 		this.shield = shield;
 		setHighlightConfig(config);
 	}
-
+ 
 	public void setHighlightConfig(PhosaniQolConfig config)
 	{
 		super.setHighlightConfig(
