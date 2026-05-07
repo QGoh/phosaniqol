@@ -233,7 +233,8 @@ public class PhosaniQolPlugin extends Plugin
 			{
 				if (READY_TOTEMS.contains(npcId))
 				{
-					int charge = Math.min(200, recalculateCharge(actor) + hitsplatAmount);
+					int recalculated = recalculateCharge(actor);
+					int charge = Math.min(200, recalculated);
 					// to avoid double counting the hit processed from xp drop
 					if (charge > -1 && charge > totems.get(npcId).getCharge())
 					{
