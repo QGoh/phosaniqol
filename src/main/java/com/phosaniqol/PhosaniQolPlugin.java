@@ -55,9 +55,7 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_TOTEM_1_READY,
 		NpcID.NIGHTMARE_TOTEM_2_READY,
 		NpcID.NIGHTMARE_TOTEM_3_READY,
-		NpcID.NIGHTMARE_TOTEM_4_READY,
-		NpcID.RAT_BOSS_INSTANCE,
-		NpcID.RAT_BOSS_GIANT_RAT
+		NpcID.NIGHTMARE_TOTEM_4_READY
 	);
 
 	private final Set<Integer> CHARGED_TOTEMS = ImmutableSet.of(
