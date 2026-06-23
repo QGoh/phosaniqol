@@ -25,7 +25,6 @@ import net.runelite.api.events.NpcChanged;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
-import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarbitID;
@@ -56,7 +55,9 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_TOTEM_1_READY,
 		NpcID.NIGHTMARE_TOTEM_2_READY,
 		NpcID.NIGHTMARE_TOTEM_3_READY,
-		NpcID.NIGHTMARE_TOTEM_4_READY
+		NpcID.NIGHTMARE_TOTEM_4_READY,
+		NpcID.RAT_BOSS_INSTANCE,
+		NpcID.RAT_BOSS_GIANT_RAT
 	);
 
 	private final Set<Integer> CHARGED_TOTEMS = ImmutableSet.of(
@@ -188,61 +189,59 @@ public class PhosaniQolPlugin extends Plugin
 	@Subscribe
 	public void onFakeXpDrop(FakeXpDrop event)
 	{
-		Skill skill = event.getSkill();
-		xpDrops.add(skill);
-
-		if (skill == Skill.HITPOINTS)
+		clientThread.invokeLater(() ->
 		{
-			Player player = client.getLocalPlayer();
-			Actor actor = player.getInteracting();
-			if (actor instanceof NPC)
+			Skill skill = event.getSkill();
+			xpDrops.add(skill);
+
+			if (skill == Skill.HITPOINTS)
 			{
-				int npcId = ((NPC) actor).getId();
-				if (READY_TOTEMS.contains(npcId))
+				Player player = client.getLocalPlayer();
+				Actor actor = player.getInteracting();
+				if (actor instanceof NPC)
 				{
-					int hit = (event.getXp() == 0) ? 1 : (int) Math.round(event.getXp() * (3.0d / 4.0d));
-					int multiplier = (xpDrops.contains(Skill.MAGIC)) ? 2 : 1;
-					int charge = totems.get(npcId).getCharge() + (hit * multiplier);
-					if (charge > 200)
+					int npcId = ((NPC) actor).getId();
+					if (READY_TOTEMS.contains(npcId))
 					{
-						charge = 200;
+						int hit = (event.getXp() == 0) ? 1 : (int) Math.round(event.getXp() * (3.0d / 4.0d));
+						int multiplier = (xpDrops.contains(Skill.MAGIC)) ? 2 : 1;
+						int charge = totems.get(npcId).getCharge() + (hit * multiplier);
+						totems.get(npcId).setCharge(Math.min(charge, 200));
 					}
-					totems.get(npcId).setCharge(charge);
 				}
+				xpDrops.clear();
 			}
-			xpDrops.clear();
-		}
+		});
 	}
 
 	@Subscribe
 	public void onHitsplatApplied(HitsplatApplied event)
 	{
-		Actor actor = event.getActor();
-		if (actor instanceof NPC)
+		clientThread.invokeLater(() ->
 		{
-			int npcId = ((NPC) actor).getId();
-			int hitsplatType = event.getHitsplat().getHitsplatType();
-			int hitsplatAmount = event.getHitsplat().getAmount();
+			Actor actor = event.getActor();
+			if (actor instanceof NPC)
+			{
+				int npcId = ((NPC) actor).getId();
+				int hitsplatType = event.getHitsplat().getHitsplatType();
+				//int hitsplatAmount = event.getHitsplat().getAmount();
 
-			if (hitsplatType == HitsplatID.DAMAGE_OTHER_WHITE && READY_TOTEMS.contains(npcId))
-			{
-				int charge = Math.max(0, totems.get(npcId).getCharge() - hitsplatAmount);
-				totems.get(npcId).setCharge(charge);
-			}
-			else
-			{
-				if (READY_TOTEMS.contains(npcId))
+				if (hitsplatType == HitsplatID.DAMAGE_OTHER_WHITE && READY_TOTEMS.contains(npcId))
 				{
-					int recalculated = recalculateCharge(actor);
-					int charge = Math.min(200, recalculated);
-					// to avoid double counting the hit processed from xp drop
-					if (charge > -1 && charge > totems.get(npcId).getCharge())
+					int charge = Math.max(0, totems.get(npcId).getCharge());
+					totems.get(npcId).setCharge(charge);
+				}
+				else
+				{
+					if (READY_TOTEMS.contains(npcId))
 					{
-						totems.get(npcId).setCharge(charge);
+						int recalculated = recalculateCharge(actor);
+						int charge = Math.min(200, recalculated);
+						totems.get(npcId).setCharge(Math.max(charge, totems.get(npcId).getCharge()));
 					}
 				}
 			}
-		}
+		});
 	}
 
 	@Subscribe
