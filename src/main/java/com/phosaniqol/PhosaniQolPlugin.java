@@ -11,12 +11,17 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
+import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.GameState;
-import net.runelite.api.HitsplatID;
+import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
+import net.runelite.api.coords.WorldArea;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.BeforeRender;
 import net.runelite.api.events.FakeXpDrop;
 import net.runelite.api.events.GameStateChanged;
@@ -33,6 +38,8 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemStats;
 import net.runelite.client.game.NPCManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -43,7 +50,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 public class PhosaniQolPlugin extends Plugin
 {
 	// 1 = SW, 2 = SW, 3 = NW, 4 = NE
-	private final Set<Integer> DORMANT_TOTEMS = ImmutableSet.of(
+	private final Set<Integer> dormantTotems = ImmutableSet.of(
 		NpcID.NIGHTMARE_TOTEM_1_DORMANT,
 		NpcID.NIGHTMARE_TOTEM_2_DORMANT,
 		NpcID.NIGHTMARE_TOTEM_3_DORMANT,
@@ -51,21 +58,21 @@ public class PhosaniQolPlugin extends Plugin
 	);
 
 	@Getter
-	private final Set<Integer> READY_TOTEMS = ImmutableSet.of(
+	private final Set<Integer> readyTotems = ImmutableSet.of(
 		NpcID.NIGHTMARE_TOTEM_1_READY,
 		NpcID.NIGHTMARE_TOTEM_2_READY,
 		NpcID.NIGHTMARE_TOTEM_3_READY,
 		NpcID.NIGHTMARE_TOTEM_4_READY
 	);
 
-	private final Set<Integer> CHARGED_TOTEMS = ImmutableSet.of(
+	private final Set<Integer> chargedTotems = ImmutableSet.of(
 		NpcID.NIGHTMARE_TOTEM_1_CHARGED,
 		NpcID.NIGHTMARE_TOTEM_2_CHARGED,
 		NpcID.NIGHTMARE_TOTEM_3_CHARGED,
 		NpcID.NIGHTMARE_TOTEM_4_CHARGED
 	);
 
-	private final Set<Integer> PHOSANI_PHASES = ImmutableSet.of(
+	private final Set<Integer> phosaniPhases = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_01,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_02,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_03,
@@ -81,7 +88,7 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_CHALLENGE_BLAST
 	);
 
-	private final Set<Integer> PHOSANI_ADDS = ImmutableSet.of(
+	private final Set<Integer> phosaniAdds = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_PARASITE,
 		NpcID.NIGHTMARE_CHALLENGE_PARASITE_WEAK,
 		NpcID.NIGHTMARE_CHALLENGE_HUSK_RANGED,
@@ -105,6 +112,9 @@ public class PhosaniQolPlugin extends Plugin
 
 	@Inject
 	private NPCManager npcManager;
+
+	@Inject
+	private ItemManager itemManager;
 
 	@Inject
 	private PhosaniQolOverlay overlay;
@@ -187,10 +197,13 @@ public class PhosaniQolPlugin extends Plugin
 	@Subscribe
 	public void onFakeXpDrop(FakeXpDrop event)
 	{
+		final int attackTick = client.getTickCount();
 		clientThread.invokeLater(() ->
 		{
 			Skill skill = event.getSkill();
 			xpDrops.add(skill);
+
+			TotemWeapon totemWeapon = usedWeapon();
 
 			if (skill == Skill.HITPOINTS)
 			{
@@ -199,13 +212,18 @@ public class PhosaniQolPlugin extends Plugin
 				if (actor instanceof NPC)
 				{
 					int npcId = ((NPC) actor).getId();
-					if (READY_TOTEMS.contains(npcId))
+					if (!readyTotems.contains(npcId)) return;
+
+					int hit = (event.getXp() == 0) ? 1 : (int) Math.round(event.getXp() * (3.0d / 4.0d));
+					int multiplier = (xpDrops.contains(Skill.MAGIC)) ? 2 : 1;
+
+					if (totemWeapon != null)
 					{
-						int hit = (event.getXp() == 0) ? 1 : (int) Math.round(event.getXp() * (3.0d / 4.0d));
-						int multiplier = (xpDrops.contains(Skill.MAGIC)) ? 2 : 1;
-						int charge = totems.get(npcId).getCharge() + (hit * multiplier);
-						totems.get(npcId).setCharge(Math.min(charge, 200));
+						int expireTick = attackTick + getHitDelay(totemWeapon, actor);
+						totems.get(npcId).addHit(expireTick, hit * multiplier);
 					}
+
+					totems.get(npcId).incrementCharge(hit * multiplier);
 				}
 				xpDrops.clear();
 			}
@@ -215,29 +233,26 @@ public class PhosaniQolPlugin extends Plugin
 	@Subscribe
 	public void onHitsplatApplied(HitsplatApplied event)
 	{
+		int hitsplatTick = client.getTickCount();
 		clientThread.invokeLater(() ->
 		{
 			Actor actor = event.getActor();
 			if (actor instanceof NPC)
 			{
+				usedWeapon();
 				int npcId = ((NPC) actor).getId();
-				int hitsplatType = event.getHitsplat().getHitsplatType();
+
+				//int hitsplatType = event.getHitsplat().getHitsplatType();
 				//int hitsplatAmount = event.getHitsplat().getAmount();
 
-				if (hitsplatType == HitsplatID.DAMAGE_OTHER_WHITE && READY_TOTEMS.contains(npcId))
-				{
-					int charge = Math.max(0, totems.get(npcId).getCharge());
-					totems.get(npcId).setCharge(charge);
-				}
-				else
-				{
-					if (READY_TOTEMS.contains(npcId))
-					{
-						int recalculated = recalculateCharge(actor);
-						int charge = Math.min(200, recalculated);
-						totems.get(npcId).setCharge(Math.max(charge, totems.get(npcId).getCharge()));
-					}
-				}
+				if (!readyTotems.contains(npcId)) return;
+
+				PhosaniTotem targetTotem = totems.get(npcId);
+				int recalculatedCharge = targetTotem.recalculateCharge();
+				targetTotem.removeHits(hitsplatTick);
+				int queuedHits = targetTotem.sumQueue();
+				//log.info("RECALCULATED " + recalculatedCharge + " QUEUE " + queuedHits);
+				targetTotem.setCharge(recalculatedCharge + queuedHits);
 			}
 		});
 	}
@@ -264,15 +279,15 @@ public class PhosaniQolPlugin extends Plugin
 		int oldNpcId = oldNpc.getId();
 		int newNpcId = newNpc.getId();
 
-		if (DORMANT_TOTEMS.contains(oldNpcId) || READY_TOTEMS.contains(oldNpcId) || CHARGED_TOTEMS.contains(oldNpcId))
+		if (dormantTotems.contains(oldNpcId) || readyTotems.contains(oldNpcId) || chargedTotems.contains(oldNpcId))
 		{
 			totems.remove(oldNpcId);
-			int charge = (CHARGED_TOTEMS.contains(newNpcId)) ? 200
-				: (READY_TOTEMS.contains(newNpcId)) ? 0
+			int charge = (chargedTotems.contains(newNpcId)) ? 200
+				: (readyTotems.contains(newNpcId)) ? 0
 				: -1;
 			totems.put(newNpcId, new PhosaniTotem(newNpc, charge, config));
 		}
-		else if (PHOSANI_PHASES.contains(newNpcId))
+		else if (phosaniPhases.contains(newNpcId))
 		{
 			phosaniBoss.setNpc(newNpc);
 			int shield = -1;
@@ -304,19 +319,19 @@ public class PhosaniQolPlugin extends Plugin
 	{
 		NPC npc = event.getNpc();
 		int npcId = npc.getId();
-		if (DORMANT_TOTEMS.contains(npcId))
+		if (dormantTotems.contains(npcId))
 		{
 			totems.put(npcId, new PhosaniTotem(npc, -1, config));
 		}
-		else if (READY_TOTEMS.contains(npcId))
+		else if (readyTotems.contains(npcId))
 		{
 			totems.put(npcId, new PhosaniTotem(npc, 0, config));
 		}
-		else if (CHARGED_TOTEMS.contains(npcId))
+		else if (chargedTotems.contains(npcId))
 		{
 			totems.put(npcId, new PhosaniTotem(npc, 200, config));
 		}
-		else if (PHOSANI_PHASES.contains(npcId))
+		else if (phosaniPhases.contains(npcId))
 		{
 			int shield = -1;
 			if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1 && npcId != NpcID.NIGHTMARE_CHALLENGE_INITIAL)
@@ -325,7 +340,7 @@ public class PhosaniQolPlugin extends Plugin
 			}
 			phosaniBoss = new PhosaniBoss(npc, shield, config);
 		}
-		else if (PHOSANI_ADDS.contains(npcId))
+		else if (phosaniAdds.contains(npcId))
 		{
 			int index = npc.getIndex();
 			int key = -(npcId + index);
@@ -338,7 +353,7 @@ public class PhosaniQolPlugin extends Plugin
 	{
 		NPC npc = event.getNpc();
 		int npcId = npc.getId();
-		if (PHOSANI_ADDS.contains(npcId))
+		if (phosaniAdds.contains(npcId))
 		{
 			int index = npc.getIndex();
 			int key = -(npcId + index);
@@ -359,48 +374,79 @@ public class PhosaniQolPlugin extends Plugin
 		}
 	}
 
-	// copied from opponentInfo plugin
-	private int recalculateCharge(Actor actor)
-	{
-		if (!(actor instanceof NPC))
-		{
-			return -1;
-		}
-
-		//int npcId = ((NPC) actor).getId();
-		int chargeRatio = actor.getHealthRatio();
-		int chargeScale = actor.getHealthScale();
-		int maxCharge = 200;
-		if (chargeRatio >= 0 && chargeScale > 0)
-		{
-			// This is the reverse of the calculation of chargeRatio done by the server
-			// which is: chargeRatio = 1 + (chargeScale - 1) * charge / maxCharge (if charge > 0, 0 otherwise)
-			// It's able to recover the exact charge if maxCharge <= chargeScale.
-			int floor = 0;
-			int ceiling;
-			if (chargeRatio > 1)
-			{
-				// This doesn't apply if chargeRatio = 1, because of the special case in the server calculation that
-				// charge = 0 forces chargeRatio = 0 instead of the expected chargeRatio = 1
-				floor = (maxCharge * (chargeRatio - 1) + chargeScale - 2) / (chargeScale - 1);
-			}
-			ceiling = (maxCharge * chargeRatio - 1) / (chargeScale - 1);
-			if (ceiling > maxCharge)
-			{
-				ceiling = maxCharge;
-			}
-			// Take the average of min and max possible charges
-			return (floor + ceiling + 1) / 2;
-		}
-
-		return -1;
-	}
-
 	private void clearAll()
 	{
 		totems.clear();
 		phosaniBoss = null;
 		xpDrops.clear();
+	}
+
+	private int getHitDelay(TotemWeapon totemWeapon, Actor target)
+	{
+		if (target == null)
+			return 1;
+
+		Player player = client.getLocalPlayer();
+		if (player == null)
+			return 1;
+
+		WorldPoint playerWp = player.getWorldLocation();
+		if (playerWp == null)
+			return 1;
+
+		WorldArea targetArea = target.getWorldArea();
+		if (targetArea == null)
+			return 1;
+
+		final int distance = targetArea.distanceTo(playerWp);
+
+		return totemWeapon.getHitDelay(distance);
+	}
+
+	private TotemWeapon usedWeapon()
+	{
+		// TODO: manually casted spells
+		// WIDGET_TARGET_ON_NPC
+		// Client::getSelectedWidget
+		if (client.getVarbitValue(VarbitID.AUTOCAST_SPELL) != 0)
+		{
+			return TotemWeapon.SPELLBOOK;
+		}
+
+		ItemContainer equipment = client.getItemContainer(InventoryID.WORN);
+		if (equipment == null)
+		{
+			return null;
+		}
+
+		Item weapon = equipment.getItem(EquipmentInventorySlot.WEAPON.getSlotIdx());
+		if (weapon == null)
+		{
+			return null;
+		}
+
+		ItemStats weaponStats = itemManager.getItemStats(weapon.getId());
+		if (weaponStats != null && weaponStats.getEquipment().getRstr() > 0)
+		{
+			if (weaponStats.getEquipment().getAspeed() <= 3)
+			{
+				return TotemWeapon.THROWN;
+			}
+			else
+			{
+				return TotemWeapon.BOW;
+			}
+		}
+
+		for (TotemWeapon totemWeapon : TotemWeapon.values())
+		{
+			if (totemWeapon.contains(weapon.getId()))
+			{
+				return totemWeapon;
+			}
+		}
+
+		return TotemWeapon.MELEE;
 	}
 
 	@Provides

@@ -47,7 +47,7 @@ public class PhosaniQolOverlay extends Overlay
 		Map<Integer, PhosaniTotem> totems = plugin.getTotems();
 		totems.forEach((npcId, totem) ->
 		{
-			if (plugin.getREADY_TOTEMS().contains(npcId))
+			if (plugin.getReadyTotems().contains(npcId))
 			{
 				highlightNpc(graphics2D, totem);
 			}
