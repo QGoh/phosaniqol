@@ -286,6 +286,39 @@ public interface PhosaniQolConfig extends Config
 		return new Color(0, 225, 255, 30);
 	}
 
+	@ConfigSection(
+		position = 3,
+		name = "Other Settings",
+		description = "Additional settings and features",
+		closedByDefault = true
+	)
+	String otherSettings = "otherSettings";
+
+	@ConfigItem(
+		position = 0,
+		keyName = "highlightSpores",
+		name = "Highlight Spores",
+		description = "Choose how spores are highlighted",
+		section = otherSettings
+	)
+	default SporeHighlightStyle highlightSpores()
+	{
+		return SporeHighlightStyle.FILL;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 1,
+		keyName = "sporesColor",
+		name = "Spores Color",
+		description = "Choose the color used to highlight spores",
+		section = otherSettings
+	)
+	default Color sporesColor()
+	{
+		return new Color(231, 177, 112, 200);
+	}
+
 	@Getter
 	@RequiredArgsConstructor
 	enum HighlightStyle
@@ -297,6 +330,18 @@ public interface PhosaniQolConfig extends Config
 		CLICKBOX("Clickbox");
 
 		private final String highlightStyle;
+	}
+
+	@Getter
+	@RequiredArgsConstructor
+	enum SporeHighlightStyle
+	{
+		NONE("None"),
+		FILL("Fill"),
+		TILE("Tile"),
+		OUTLINE("Outline");
+
+		private final String sporeHighlightStyle;
 	}
 
 	@Getter

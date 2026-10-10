@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -19,6 +20,7 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
+import net.runelite.api.GameObject;
 
 @Slf4j
 public class PhosaniQolOverlay extends Overlay
@@ -56,6 +58,9 @@ public class PhosaniQolOverlay extends Overlay
 		Map<Integer, PhosaniAdd> adds = plugin.getAdds();
 		adds.forEach((npcId, add) -> highlightNpc(graphics2D, add));
 
+		Set<PhosaniSpore> spores = plugin.getSpores();
+		spores.forEach(spore -> highlightSpore(graphics2D, spore));
+//				renderer.drawOutline(spore, 2, Color.YELLOW, 0);
 		return null;
 	}
 
@@ -174,6 +179,48 @@ public class PhosaniQolOverlay extends Overlay
 				graphics2D.setColor(fillColor);
 				graphics2D.fill(shape);
 			}
+		}
+	}
+
+	private void highlightSpore(Graphics2D graphics2D, PhosaniSpore spore)
+	{
+		GameObject gameObject = spore.getGameObject();
+		PhosaniQolConfig.SporeHighlightStyle style = spore.getHighlightStyle();
+
+		if (gameObject == null || style == PhosaniQolConfig.SporeHighlightStyle.NONE)
+		{
+			return;
+		}
+
+		Color color = spore.getColor();
+
+		if (style == PhosaniQolConfig.SporeHighlightStyle.OUTLINE)
+		{
+			renderer.drawOutline(gameObject, 2, color, 0);
+			return;
+		}
+
+		Shape shape = Perspective.getCanvasTilePoly(client, gameObject.getLocalLocation());
+
+		if (shape == null)
+		{
+			return;
+		}
+
+		graphics2D.setRenderingHint(
+			RenderingHints.KEY_ANTIALIASING,
+			RenderingHints.VALUE_ANTIALIAS_ON
+		);
+		graphics2D.setColor(color);
+
+		if (style == PhosaniQolConfig.SporeHighlightStyle.FILL)
+		{
+			graphics2D.fill(shape);
+		}
+		else
+		{
+			graphics2D.setStroke(new BasicStroke(2));
+			graphics2D.draw(shape);
 		}
 	}
 }
