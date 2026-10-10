@@ -39,6 +39,9 @@ import net.runelite.client.game.NPCManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.api.GameObject;
+import net.runelite.api.events.GameObjectSpawned;
+import net.runelite.api.events.GameObjectDespawned;
 
 @Slf4j
 @PluginDescriptor(name = "Phosani QoL")
@@ -92,6 +95,12 @@ public class PhosaniQolPlugin extends Plugin
 	);
 
 	private final int HPBAR_HUD = 6099;
+
+	private static final int SPORE_GROWING_ID = 37738;
+	private static final int SPORE_OBJECT_ID = 37739;
+
+	@Getter
+	private final Set<PhosaniSpore> spores = new HashSet<>();
 
 	@Inject
 	private Client client;
@@ -176,6 +185,10 @@ public class PhosaniQolPlugin extends Plugin
 					{
 						healthBar.setHidden(config.hideHealthOverlay());
 					}
+				case "highlightSpores":
+				case "sporesColor":
+					spores.forEach(spore -> spore.setHighlightConfig(config));
+					break;
 			}
 		}
 	}
@@ -423,11 +436,30 @@ public class PhosaniQolPlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	public void onGameObjectSpawned(GameObjectSpawned event)
+	{
+		GameObject object = event.getGameObject();
+
+		if (object.getId() == SPORE_GROWING_ID || object.getId() == SPORE_OBJECT_ID)
+		{
+			spores.add(new PhosaniSpore(object, config));
+		}
+	}
+
+	@Subscribe
+	public void onGameObjectDespawned(GameObjectDespawned event)
+	{
+		GameObject object = event.getGameObject();
+		spores.removeIf(spore -> spore.getGameObject() == object);
+	}
+
 	private void clearAll()
 	{
 		totems.clear();
 		phosaniBoss = null;
 		xpDrops.clear();
+		spores.clear();
 	}
 
 	@Provides
