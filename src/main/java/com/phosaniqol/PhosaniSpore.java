@@ -10,8 +10,10 @@ import net.runelite.api.GameObject;
 public class PhosaniSpore
 {
 	private GameObject gameObject;
-	private PhosaniQolConfig.SporeHighlightStyle highlightStyle;
-	private Color color;
+	private PhosaniQolConfig.HighlightStyle highlightStyle;
+	private Double borderWidth;
+	private Color borderColor;
+	private Color fillColor;
 
 	public PhosaniSpore(GameObject gameObject, PhosaniQolConfig config)
 	{
@@ -22,6 +24,8 @@ public class PhosaniSpore
 	public void setHighlightConfig(PhosaniQolConfig config)
 	{
 		this.highlightStyle = config.highlightSpores();
-		this.color = config.sporesColor();
+		this.borderWidth = config.sporesBorderWidth();
+		this.borderColor = config.sporesBorderColor();
+		this.fillColor = config.sporesFillColor();
 	}
 }

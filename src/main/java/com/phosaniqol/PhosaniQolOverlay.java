@@ -183,43 +183,47 @@ public class PhosaniQolOverlay extends Overlay
 
 	private void highlightSpore(Graphics2D graphics2D, PhosaniSpore spore)
 	{
-		GameObject gameObject = spore.getGameObject();
-		PhosaniQolConfig.SporeHighlightStyle style = spore.getHighlightStyle();
+		GameObject sporeObject = spore.getGameObject();
+		PhosaniQolConfig.HighlightStyle highlightStyle = spore.getHighlightStyle();
 
-		if (gameObject == null || style == PhosaniQolConfig.SporeHighlightStyle.NONE)
+		if (sporeObject == null || highlightStyle == PhosaniQolConfig.HighlightStyle.NONE)
 		{
 			return;
 		}
 
-		Color color = spore.getColor();
+		Color borderColor = spore.getBorderColor();
+		Color fillColor = spore.getFillColor();
+		Double width = spore.getBorderWidth();
 
-		if (style == PhosaniQolConfig.SporeHighlightStyle.OUTLINE)
+		Shape shape = null;
+		if (highlightStyle == PhosaniQolConfig.HighlightStyle.TILE)
 		{
-			renderer.drawOutline(gameObject, 2, color, 0);
-			return;
+			shape = Perspective.getCanvasTilePoly(client, sporeObject.getLocalLocation());
+		}
+		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.HULL)
+		{
+			shape = sporeObject.getConvexHull();
+		}
+		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.CLICKBOX)
+		{
+			shape = sporeObject.getClickbox();
+		}
+		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.OUTLINE)
+		{
+			renderer.drawOutline(sporeObject, width.intValue(), borderColor, 5);
 		}
 
-		Shape shape = Perspective.getCanvasTilePoly(client, gameObject.getLocalLocation());
-
-		if (shape == null)
+		if (shape != null)
 		{
-			return;
-		}
-
-		graphics2D.setRenderingHint(
-			RenderingHints.KEY_ANTIALIASING,
-			RenderingHints.VALUE_ANTIALIAS_ON
-		);
-		graphics2D.setColor(color);
-
-		if (style == PhosaniQolConfig.SporeHighlightStyle.FILL)
-		{
-			graphics2D.fill(shape);
-		}
-		else
-		{
-			graphics2D.setStroke(new BasicStroke(2));
+			graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			graphics2D.setColor(borderColor);
+			graphics2D.setStroke(new BasicStroke(width.floatValue()));
 			graphics2D.draw(shape);
+			if (fillColor != null)
+			{
+				graphics2D.setColor(fillColor);
+				graphics2D.fill(shape);
+			}
 		}
 	}
 }

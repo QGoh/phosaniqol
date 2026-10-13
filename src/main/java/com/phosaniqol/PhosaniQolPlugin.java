@@ -99,9 +99,6 @@ public class PhosaniQolPlugin extends Plugin
 	private static final int SPORE_GROWING_ID = 37738;
 	private static final int SPORE_OBJECT_ID = 37739;
 
-	@Getter
-	private final Set<PhosaniSpore> spores = new HashSet<>();
-
 	@Inject
 	private Client client;
 
@@ -129,6 +126,8 @@ public class PhosaniQolPlugin extends Plugin
 	private PhosaniBoss phosaniBoss = null;
 	@Getter
 	private final Map<Integer, PhosaniAdd> adds = new HashMap<>();
+	@Getter
+	private final Set<PhosaniSpore> spores = new HashSet<>();
 	private final Set<Skill> xpDrops = new HashSet<>();
 
 	@Override
@@ -186,7 +185,9 @@ public class PhosaniQolPlugin extends Plugin
 						healthBar.setHidden(config.hideHealthOverlay());
 					}
 				case "highlightSpores":
-				case "sporesColor":
+				case "sporesBorderWidth":
+				case "sporesBorderColor":
+				case "sporesFillColor":
 					spores.forEach(spore -> spore.setHighlightConfig(config));
 					break;
 			}

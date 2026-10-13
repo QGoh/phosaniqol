@@ -301,22 +301,47 @@ public interface PhosaniQolConfig extends Config
 		description = "Choose how spores are highlighted",
 		section = otherSettings
 	)
-	default SporeHighlightStyle highlightSpores()
+	default HighlightStyle highlightSpores()
 	{
-		return SporeHighlightStyle.FILL;
+		return HighlightStyle.TILE;
+	}
+
+	@ConfigItem(
+		position = 1,
+		keyName = "sporesBorderWidth",
+		name = "Border Width",
+		description = "Sets the width of the lines highlighting spores",
+		section = otherSettings
+	)
+	default double sporesBorderWidth()
+	{
+		return 1.0;
 	}
 
 	@Alpha
 	@ConfigItem(
-		position = 1,
-		keyName = "sporesColor",
-		name = "Spores Color",
-		description = "Choose the color used to highlight spores",
+		position = 2,
+		keyName = "sporesBorderColor",
+		name = "Border Color",
+		description = "Sets the border color highlighting spores",
 		section = otherSettings
 	)
-	default Color sporesColor()
+	default Color sporesBorderColor()
 	{
-		return new Color(231, 177, 112, 200);
+		return new Color(255, 255, 0);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 3,
+		keyName = "sporesFillColor",
+		name = "Fill Color",
+		description = "Sets the fill color highlighting spores",
+		section = otherSettings
+	)
+	default Color sporesFillColor()
+	{
+		return new Color(255, 255, 0, 30);
 	}
 
 	@Getter
@@ -330,18 +355,6 @@ public interface PhosaniQolConfig extends Config
 		CLICKBOX("Clickbox");
 
 		private final String highlightStyle;
-	}
-
-	@Getter
-	@RequiredArgsConstructor
-	enum SporeHighlightStyle
-	{
-		NONE("None"),
-		FILL("Fill"),
-		TILE("Tile"),
-		OUTLINE("Outline");
-
-		private final String sporeHighlightStyle;
 	}
 
 	@Getter

@@ -11,24 +11,24 @@ import net.runelite.api.gameval.NpcID;
 @Setter
 public class PhosaniAdd extends PhosaniNpc
 {
-	private final Map<Integer, PhosaniQolConfig.HighlightStyle> HIGHLIGHT_STYLE_MAP;
+	private final Map<Integer, PhosaniQolConfig.HighlightStyle> highlightStyleMap;
 
 	public PhosaniAdd(NPC npc, PhosaniQolConfig config)
 	{
 		super.setNpc(npc);
-		this.HIGHLIGHT_STYLE_MAP = new HashMap<>();
-		this.HIGHLIGHT_STYLE_MAP.put(NpcID.NIGHTMARE_CHALLENGE_PARASITE, config.highlightParasite());
-		this.HIGHLIGHT_STYLE_MAP.put(NpcID.NIGHTMARE_CHALLENGE_PARASITE_WEAK, config.highlightParasite());
-		this.HIGHLIGHT_STYLE_MAP.put(NpcID.NIGHTMARE_CHALLENGE_HUSK_RANGED, config.highlightRangedHusk());
-		this.HIGHLIGHT_STYLE_MAP.put(NpcID.NIGHTMARE_CHALLENGE_HUSK_MAGIC, config.highlightMagicHusk());
-		this.HIGHLIGHT_STYLE_MAP.put(NpcID.NIGHTMARE_CHALLENGE_SLEEPWALKER, config.highlightSleepwalkers());
+		this.highlightStyleMap = new HashMap<>();
+		this.highlightStyleMap.put(NpcID.NIGHTMARE_CHALLENGE_PARASITE, config.highlightParasite());
+		this.highlightStyleMap.put(NpcID.NIGHTMARE_CHALLENGE_PARASITE_WEAK, config.highlightParasite());
+		this.highlightStyleMap.put(NpcID.NIGHTMARE_CHALLENGE_HUSK_RANGED, config.highlightRangedHusk());
+		this.highlightStyleMap.put(NpcID.NIGHTMARE_CHALLENGE_HUSK_MAGIC, config.highlightMagicHusk());
+		this.highlightStyleMap.put(NpcID.NIGHTMARE_CHALLENGE_SLEEPWALKER, config.highlightSleepwalkers());
 		setHighlightConfig(config);
 	}
 
 	public void setHighlightConfig(PhosaniQolConfig config)
 	{
 		super.setHighlightConfig(
-			HIGHLIGHT_STYLE_MAP.get(super.getNpc().getId()),
+			highlightStyleMap.get(super.getNpc().getId()),
 			config.addsBorderWidth(),
 			config.addsBorderColor(),
 			config.addsFillColor(),
