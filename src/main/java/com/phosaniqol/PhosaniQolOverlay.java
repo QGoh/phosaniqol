@@ -1,9 +1,11 @@
 package com.phosaniqol;
 
+import com.phosaniqol.npcs.PhosaniBoss;
+import com.phosaniqol.npcs.PhosaniNpc;
+import com.phosaniqol.npcs.PhosaniTotem;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -16,6 +18,7 @@ import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.client.config.FontType;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -47,18 +50,12 @@ public class PhosaniQolOverlay extends Overlay
 		highlightNpc(graphics2D, phosaniBoss);
 
 		Map<Integer, PhosaniTotem> totems = plugin.getTotems();
-		totems.forEach((npcId, totem) ->
-		{
-			if (plugin.getReadyTotems().contains(npcId))
-			{
-				highlightNpc(graphics2D, totem);
-			}
-		});
+		totems.forEach((npcId, totem) -> highlightNpc(graphics2D, totem));
 
-		Map<Integer, PhosaniAdd> adds = plugin.getAdds();
+		Map<Integer, PhosaniNpc> adds = plugin.getAdds();
 		adds.forEach((npcId, add) -> highlightNpc(graphics2D, add));
 
-		Set<PhosaniSpore> spores = plugin.getSpores();
+		Set<Spore> spores = plugin.getSpores();
 		spores.forEach(spore -> highlightSpore(graphics2D, spore));
 		return null;
 	}
@@ -72,61 +69,36 @@ public class PhosaniQolOverlay extends Overlay
 
 		NPC npc = phosaniNpc.getNpc();
 
-		if (phosaniNpc.getTextOverlay() != PhosaniQolConfig.OverlayType.NONE && npc != null)
+		if (phosaniNpc.getOverlayType() != OverlayType.NONE && npc != null)
 		{
-			String text = null;
-			Color textOverlayColor = phosaniNpc.getTextOverlayColor();
-			Font textOverlayFont = phosaniNpc.getTextOverlayFont();
-			int textOverlayOffset = phosaniNpc.getTextOverlayOffset();
-			if (phosaniNpc instanceof PhosaniTotem)
+			String text;
+			Color textOverlayColor = phosaniNpc.getOverlayColor();
+			FontType textOverlayFont = phosaniNpc.getOverlayFont();
+			int textOverlayOffset = phosaniNpc.getOverlayOffset();
+
+			if (phosaniNpc.getOverlayType() == OverlayType.PERCENTAGE)
 			{
-				int charge = ((PhosaniTotem) phosaniNpc).getCharge();
-				if (charge >= 0)
-				{
-					if (phosaniNpc.getTextOverlay() == PhosaniQolConfig.OverlayType.PERCENTAGE)
-					{
-						charge = charge / 2;
-						text = charge + "%";
-					}
-					else
-					{
-						text = String.valueOf(charge);
-					}
-				}
+				text = phosaniNpc.getHealthPercent() + "%";
 			}
-			else if (phosaniNpc instanceof PhosaniBoss)
+			else
 			{
-				int shield = ((PhosaniBoss) phosaniNpc).getShield();
-				if (shield > 0)
-				{
-					if (phosaniNpc.getTextOverlay() == PhosaniQolConfig.OverlayType.PERCENTAGE)
-					{
-						shield = (npc.getHealthRatio() * 100) / npc.getHealthScale();
-						text = shield + "%";
-					}
-					else
-					{
-						text = String.valueOf(shield);
-					}
-				}
+				text = String.valueOf(phosaniNpc.getHealthValue());
 			}
-			if (text != null)
+
+			Point textLocation = npc.getCanvasTextLocation(graphics2D, text, textOverlayOffset);
+			if (textLocation != null)
 			{
-				Point textLocation = npc.getCanvasTextLocation(graphics2D, text, textOverlayOffset);
-				if (textLocation != null)
-				{
-					graphics2D.setFont(textOverlayFont);
-					graphics2D.setColor(textOverlayColor);
-					graphics2D.drawString(text, textLocation.getX(), textLocation.getY());
-				}
+				graphics2D.setFont(textOverlayFont.getFont());
+				graphics2D.setColor(textOverlayColor);
+				graphics2D.drawString(text, textLocation.getX(), textLocation.getY());
 			}
 		}
 
-		if (phosaniNpc.getHighlightStyle() == PhosaniQolConfig.HighlightStyle.NONE)
+		if (phosaniNpc.getHighlightStyle() == HighlightStyle.NONE)
 		{
 			return;
 		}
-		if (phosaniNpc instanceof PhosaniTotem && ((PhosaniTotem) phosaniNpc).getCharge() < 200)
+		if (phosaniNpc instanceof PhosaniTotem && phosaniNpc.getHealthValue() < 200)
 		{
 			return;
 		}
@@ -143,26 +115,26 @@ public class PhosaniQolOverlay extends Overlay
 			return;
 		}
 
-		PhosaniQolConfig.HighlightStyle highlightStyle = phosaniNpc.getHighlightStyle();
+		HighlightStyle highlightStyle = phosaniNpc.getHighlightStyle();
 		Color borderColor = phosaniNpc.getBorderColor();
 		Color fillColor = phosaniNpc.getFillColor();
 		Double width = phosaniNpc.getBorderWidth();
 
 		Shape shape = null;
-		if (highlightStyle == PhosaniQolConfig.HighlightStyle.TILE)
+		if (highlightStyle == HighlightStyle.TILE)
 		{
 			shape = Perspective.getCanvasTileAreaPoly(client, localPoint, size);
 		}
-		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.HULL)
+		else if (highlightStyle == HighlightStyle.HULL)
 		{
 			shape = npc.getConvexHull();
 		}
-		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.CLICKBOX)
+		else if (highlightStyle == HighlightStyle.CLICKBOX)
 		{
 			shape = Perspective.getClickbox(client, client.getTopLevelWorldView(), npc.getModel(), npc.getCurrentOrientation(), localPoint.getX(), localPoint.getY(),
 				Perspective.getTileHeight(client, localPoint, npc.getWorldLocation().getPlane()));
 		}
-		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.OUTLINE)
+		else if (highlightStyle == HighlightStyle.OUTLINE)
 		{
 			renderer.drawOutline(npc, width.intValue(), borderColor, 5);
 		}
@@ -181,12 +153,12 @@ public class PhosaniQolOverlay extends Overlay
 		}
 	}
 
-	private void highlightSpore(Graphics2D graphics2D, PhosaniSpore spore)
+	private void highlightSpore(Graphics2D graphics2D, Spore spore)
 	{
 		GameObject sporeObject = spore.getGameObject();
-		PhosaniQolConfig.HighlightStyle highlightStyle = spore.getHighlightStyle();
+		HighlightStyle highlightStyle = spore.getHighlightStyle();
 
-		if (sporeObject == null || highlightStyle == PhosaniQolConfig.HighlightStyle.NONE)
+		if (sporeObject == null || highlightStyle == HighlightStyle.NONE)
 		{
 			return;
 		}
@@ -196,19 +168,19 @@ public class PhosaniQolOverlay extends Overlay
 		Double width = spore.getBorderWidth();
 
 		Shape shape = null;
-		if (highlightStyle == PhosaniQolConfig.HighlightStyle.TILE)
+		if (highlightStyle == HighlightStyle.TILE)
 		{
 			shape = Perspective.getCanvasTilePoly(client, sporeObject.getLocalLocation());
 		}
-		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.HULL)
+		else if (highlightStyle == HighlightStyle.HULL)
 		{
 			shape = sporeObject.getConvexHull();
 		}
-		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.CLICKBOX)
+		else if (highlightStyle == HighlightStyle.CLICKBOX)
 		{
 			shape = sporeObject.getClickbox();
 		}
-		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.OUTLINE)
+		else if (highlightStyle == HighlightStyle.OUTLINE)
 		{
 			renderer.drawOutline(sporeObject, width.intValue(), borderColor, 5);
 		}

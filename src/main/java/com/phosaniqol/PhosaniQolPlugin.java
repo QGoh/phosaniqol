@@ -2,6 +2,13 @@ package com.phosaniqol;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
+import com.phosaniqol.npcs.MagicHusk;
+import com.phosaniqol.npcs.Parasite;
+import com.phosaniqol.npcs.PhosaniBoss;
+import com.phosaniqol.npcs.PhosaniNpc;
+import com.phosaniqol.npcs.PhosaniTotem;
+import com.phosaniqol.npcs.RangedHusk;
+import com.phosaniqol.npcs.Sleepwalker;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,7 +40,6 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.NPCManager;
 import net.runelite.client.plugins.Plugin;
@@ -70,17 +76,20 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_TOTEM_4_CHARGED
 	);
 
-	private final Set<Integer> phosaniPhases = ImmutableSet.of(
+	private final Set<Integer> phosaniAlivePhases = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_01,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_02,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_03,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_04,
-		NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_01,
-		NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_02,
-		NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_03,
-		NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_04,
+		//NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_01,
+		//NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_02,
+		//NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_03,
+		//NpcID.NIGHTMARE_CHALLENGE_WEAK_PHASE_04,
+		NpcID.NIGHTMARE_CHALLENGE_PHASE_05
+	);
+
+	private final Set<Integer> phosaniDeadPhases = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_INITIAL,
-		NpcID.NIGHTMARE_CHALLENGE_PHASE_05,
 		NpcID.NIGHTMARE_CHALLENGE_DYING,
 		NpcID.NIGHTMARE_CHALLENGE_DEAD,
 		NpcID.NIGHTMARE_CHALLENGE_BLAST
@@ -125,9 +134,10 @@ public class PhosaniQolPlugin extends Plugin
 	@Getter
 	private PhosaniBoss phosaniBoss = null;
 	@Getter
-	private final Map<Integer, PhosaniAdd> adds = new HashMap<>();
+	private final Map<Integer, PhosaniNpc> adds = new HashMap<>();
 	@Getter
-	private final Set<PhosaniSpore> spores = new HashSet<>();
+	private final Set<Spore> spores = new HashSet<>();
+
 	private final Set<Skill> xpDrops = new HashSet<>();
 
 	@Override
@@ -141,57 +151,6 @@ public class PhosaniQolPlugin extends Plugin
 	{
 		overlayManager.remove(overlay);
 		clearAll();
-	}
-
-	@Subscribe
-	public void onConfigChanged(ConfigChanged event)
-	{
-		if (event.getGroup().equals(PhosaniQolConfig.CONFIG_GROUP))
-		{
-			switch (event.getKey())
-			{
-				case "highlightChargedTotems":
-				case "chargedBorderWidth":
-				case "chargedBorderColor":
-				case "chargedFillColor":
-				case "totemChargeOverlay":
-				case "totemChargeOverlayFont":
-				case "totemChargeOverlayOffset":
-				case "totemChargeOverlayColor":
-					totems.forEach((npcId, totem) -> totem.setHighlightConfig(config));
-					break;
-				case "phosaniShieldOverlay":
-				case "phosaniShieldOverlayFont":
-				case "phosaniShieldOverlayOffset":
-				case "phosaniShieldOverlayColor":
-					if (phosaniBoss != null)
-					{
-						phosaniBoss.setHighlightConfig(config);
-					}
-					break;
-				case "highlightRangedHusk":
-				case "highlightMagicHusk":
-				case "highlightParasite":
-				case "highlightSleepwalkers":
-				case "addsBorderWidth":
-				case "addsBorderColor":
-				case "addsFillColor":
-					adds.forEach((npcId, add) -> add.setHighlightConfig(config));
-					break;
-				case "hideHealthOverlay":
-					Widget healthBar = client.getWidget(InterfaceID.HpbarHud.HP);
-					if (healthBar != null)
-					{
-						healthBar.setHidden(config.hideHealthOverlay());
-					}
-				case "highlightSpores":
-				case "sporesBorderWidth":
-				case "sporesBorderColor":
-				case "sporesFillColor":
-					spores.forEach(spore -> spore.setHighlightConfig(config));
-					break;
-			}
-		}
 	}
 
 	@Subscribe
@@ -310,12 +269,8 @@ public class PhosaniQolPlugin extends Plugin
 				//int hitsplatAmount = event.getHitsplat().getAmount();
 
 				if (!readyTotems.contains(npcId)) return;
-				PhosaniTotem targetTotem = totems.get(npcId);
 
-				int recalculatedCharge = targetTotem.recalculateCharge();
-				targetTotem.consumeHits(hitsplatTick);
-				int queuedHits = targetTotem.sumQueue();
-				targetTotem.setCharge(recalculatedCharge + queuedHits);
+				totems.get(npcId).recalculateCharge(hitsplatTick);
 			}
 		});
 	}
@@ -327,10 +282,10 @@ public class PhosaniQolPlugin extends Plugin
 		{
 			return;
 		}
-		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1 && phosaniBoss != null && phosaniBoss.getShield() > 0)
+		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1 && phosaniBoss != null)
 		{
 			int shield = client.getVarbitValue(HPBAR_HUD);
-			phosaniBoss.setShield(shield);
+			phosaniBoss.setCurrentHealth(shield);
 		}
 	}
 
@@ -342,38 +297,28 @@ public class PhosaniQolPlugin extends Plugin
 		int oldNpcId = oldNpc.getId();
 		int newNpcId = newNpc.getId();
 
-		if (dormantTotems.contains(oldNpcId) || readyTotems.contains(oldNpcId) || chargedTotems.contains(oldNpcId))
+		if (readyTotems.contains(newNpcId))
+		{
+			totems.put(newNpcId, new PhosaniTotem(newNpc, 0, 200, config));
+		}
+		else if (chargedTotems.contains(newNpcId))
 		{
 			totems.remove(oldNpcId);
-			int charge = (chargedTotems.contains(newNpcId)) ? 200
-				: (readyTotems.contains(newNpcId)) ? 0
-				: -1;
-			totems.put(newNpcId, new PhosaniTotem(newNpc, charge, config));
 		}
-		else if (phosaniPhases.contains(newNpcId))
+		else if (phosaniAlivePhases.contains(newNpcId))
 		{
-			phosaniBoss.setNpc(newNpc);
-			int shield = -1;
-			switch (newNpcId)
+			if (newNpcId == NpcID.NIGHTMARE_CHALLENGE_PHASE_05)
 			{
-				case NpcID.NIGHTMARE_CHALLENGE_PHASE_01:
-					shield = 400;
-					break;
-				case NpcID.NIGHTMARE_CHALLENGE_PHASE_02:
-					shield = 400;
-					break;
-				case NpcID.NIGHTMARE_CHALLENGE_PHASE_03:
-					shield = 400;
-					break;
-				case NpcID.NIGHTMARE_CHALLENGE_PHASE_04:
-					shield = 400;
-					break;
-				case NpcID.NIGHTMARE_CHALLENGE_PHASE_05:
-					shield = 150;
-					break;
+				phosaniBoss = new PhosaniBoss(newNpc, 150, 150, config);
 			}
-			phosaniBoss.setShield(shield);
-			phosaniBoss.setHighlightConfig(config);
+			else
+			{
+				phosaniBoss = new PhosaniBoss(newNpc, 400, 400, config);
+			}
+		}
+		else if (phosaniDeadPhases.contains(newNpcId) || phosaniAlivePhases.contains(oldNpcId))
+		{
+			phosaniBoss = null;
 		}
 	}
 
@@ -382,32 +327,28 @@ public class PhosaniQolPlugin extends Plugin
 	{
 		NPC npc = event.getNpc();
 		int npcId = npc.getId();
-		if (dormantTotems.contains(npcId))
+		int index = npc.getIndex();
+		int key = -(npcId + index);
+
+		if (npcId == NpcID.NIGHTMARE_CHALLENGE_PARASITE || npcId == NpcID.NIGHTMARE_CHALLENGE_PARASITE_WEAK)
 		{
-			totems.put(npcId, new PhosaniTotem(npc, -1, config));
+			adds.put(key, new Parasite(npc, config));
 		}
-		else if (readyTotems.contains(npcId))
+		else if (npcId == NpcID.NIGHTMARE_CHALLENGE_HUSK_RANGED)
 		{
-			totems.put(npcId, new PhosaniTotem(npc, 0, config));
+			adds.put(key, new RangedHusk(npc, config));
 		}
-		else if (chargedTotems.contains(npcId))
+		else if (npcId == NpcID.NIGHTMARE_CHALLENGE_HUSK_MAGIC)
 		{
-			totems.put(npcId, new PhosaniTotem(npc, 200, config));
+			adds.put(key, new MagicHusk(npc, config));
 		}
-		else if (phosaniPhases.contains(npcId))
+		else if (npcId == NpcID.NIGHTMARE_CHALLENGE_SLEEPWALKER)
 		{
-			int shield = -1;
-			if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1 && npcId != NpcID.NIGHTMARE_CHALLENGE_INITIAL)
-			{
-				shield = client.getVarbitValue(HPBAR_HUD);
-			}
-			phosaniBoss = new PhosaniBoss(npc, shield, config);
+			adds.put(key, new Sleepwalker(npc, config));
 		}
-		else if (phosaniAdds.contains(npcId))
+		else if (phosaniDeadPhases.contains(npcId))
 		{
-			int index = npc.getIndex();
-			int key = -(npcId + index);
-			adds.put(key, new PhosaniAdd(npc, config));
+			phosaniBoss = null;
 		}
 	}
 
@@ -444,7 +385,7 @@ public class PhosaniQolPlugin extends Plugin
 
 		if (object.getId() == SPORE_GROWING_ID || object.getId() == SPORE_OBJECT_ID)
 		{
-			spores.add(new PhosaniSpore(object, config));
+			spores.add(new Spore(object, config));
 		}
 	}
 

@@ -1,15 +1,12 @@
 package com.phosaniqol;
 
 import java.awt.Color;
-import java.awt.Font;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
-import net.runelite.client.ui.FontManager;
+import net.runelite.client.config.FontType;
 
 @ConfigGroup(PhosaniQolConfig.CONFIG_GROUP)
 public interface PhosaniQolConfig extends Config
@@ -36,24 +33,12 @@ public interface PhosaniQolConfig extends Config
 		return HighlightStyle.TILE;
 	}
 
-	@ConfigItem(
-		position = 1,
-		keyName = "chargedBorderWidth",
-		name = "Border Width",
-		description = "Sets the width of the lines highlighting charged totems",
-		section = totemSettings
-	)
-	default double chargedBorderWidth()
-	{
-		return 1.0;
-	}
-
 	@Alpha
 	@ConfigItem(
-		position = 2,
+		position = 1,
 		keyName = "chargedBorderColor",
-		name = "Charged Border Color",
-		description = "Sets the border color highlighting charged totems",
+		name = " - Border Color",
+		description = "Sets the border color for charged totems",
 		section = totemSettings
 	)
 	default Color chargedBorderColor()
@@ -63,15 +48,27 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 3,
+		position = 2,
 		keyName = "chargedFillColor",
-		name = "Charged Fill Color",
-		description = "Sets the fill color for highlighting charged totems",
+		name = " - Fill Color",
+		description = "Sets the fill color for charged totems",
 		section = totemSettings
 	)
 	default Color chargedFillColor()
 	{
 		return new Color(0, 225, 255, 30);
+	}
+
+	@ConfigItem(
+		position = 3,
+		keyName = "chargedBorderWidth",
+		name = " - Border Width",
+		description = "Sets the width of the lines for charged totems",
+		section = totemSettings
+	)
+	default double chargedBorderWidth()
+	{
+		return 1.0;
 	}
 
 	@ConfigItem(
@@ -86,22 +83,23 @@ public interface PhosaniQolConfig extends Config
 		return OverlayType.NONE;
 	}
 
+	@Alpha
 	@ConfigItem(
 		position = 5,
-		keyName = "totemChargeOverlayFont",
-		name = "Overlay Font",
-		description = "Sets the font to use for drawing totem charge overlays",
+		keyName = "totemChargeOverlayColor",
+		name = " - Color",
+		description = "Sets the color to use for drawing totem charge overlays",
 		section = totemSettings
 	)
-	default Fonts totemChargeOverlayFont()
+	default Color totemChargeOverlayColor()
 	{
-		return Fonts.REGULAR;
+		return new Color(255, 255, 0);
 	}
 
 	@ConfigItem(
 		position = 6,
 		keyName = "totemChargeOverlayOffset",
-		name = "Overlay Z-Offset",
+		name = " - Z-Offset",
 		description = "Sets the z-offset for drawing totem charge overlays",
 		section = totemSettings
 	)
@@ -110,17 +108,16 @@ public interface PhosaniQolConfig extends Config
 		return 0;
 	}
 
-	@Alpha
 	@ConfigItem(
 		position = 7,
-		keyName = "totemChargeOverlayColor",
-		name = "Overlay Color",
-		description = "Sets the color to use for drawing totem charge overlays",
+		keyName = "totemChargeOverlayFont",
+		name = " - Font",
+		description = "Sets the font to use for drawing totem charge overlays",
 		section = totemSettings
 	)
-	default Color totemChargeOverlayColor()
+	default FontType totemChargeOverlayFont()
 	{
-		return new Color(255, 255, 0);
+		return FontType.REGULAR;
 	}
 
 	@ConfigSection(
@@ -143,23 +140,24 @@ public interface PhosaniQolConfig extends Config
 		return OverlayType.NONE;
 	}
 
+	@Alpha
 	@ConfigItem(
 		position = 1,
-		keyName = "phosaniShieldOverlayFont",
-		name = "Overlay Font",
-		description = "Sets the font to use for drawing Phosani's shield overlay",
+		keyName = "phosaniShieldOverlayColor",
+		name = " - Color",
+		description = "Sets the color to use for Phosani's shield overlay",
 		section = bossSettings
 	)
-	default Fonts phosaniShieldOverlayFont()
+	default Color phosaniShieldOverlayColor()
 	{
-		return Fonts.REGULAR;
+		return new Color(255, 255, 0);
 	}
 
 	@ConfigItem(
 		position = 2,
 		keyName = "phosaniShieldOverlayOffset",
-		name = "Overlay Z-Offset",
-		description = "Sets the z-offset for drawing Phosani's shield overlay",
+		name = " - Z-Offset",
+		description = "Sets the z-offset for Phosani's shield overlay",
 		section = bossSettings
 	)
 	default int phosaniShieldOverlayOffset()
@@ -167,17 +165,16 @@ public interface PhosaniQolConfig extends Config
 		return 0;
 	}
 
-	@Alpha
 	@ConfigItem(
 		position = 3,
-		keyName = "phosaniShieldOverlayColor",
-		name = "Overlay Color",
-		description = "Sets the color to use for drawing Phosani's shield overlay",
+		keyName = "phosaniShieldOverlayFont",
+		name = " - Font",
+		description = "Sets the font to use for Phosani's shield overlay",
 		section = bossSettings
 	)
-	default Color phosaniShieldOverlayColor()
+	default FontType phosaniShieldOverlayFont()
 	{
-		return new Color(255, 255, 0);
+		return FontType.REGULAR;
 	}
 
 	@ConfigItem(
@@ -212,8 +209,34 @@ public interface PhosaniQolConfig extends Config
 		return HighlightStyle.CLICKBOX;
 	}
 
+	@Alpha
 	@ConfigItem(
 		position = 1,
+		keyName = "rangedHuskBorderColor",
+		name = " - Border Color",
+		description = "Sets the border color the ranged husk",
+		section = addsSettings
+	)
+	default Color rangedHuskBorderColor()
+	{
+		return new Color(0, 225, 0);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 2,
+		keyName = "rangedHuskFillColor",
+		name = " - Fill Color",
+		description = "Sets the fill color for the ranged husk",
+		section = addsSettings
+	)
+	default Color rangedHuskFillColor()
+	{
+		return new Color(0, 225, 0, 30);
+	}
+
+	@ConfigItem(
+		position = 3,
 		keyName = "highlightMagicHusk",
 		name = "Highlight Magic Husk",
 		description = "Sets the highlight style for the magic husk",
@@ -224,11 +247,37 @@ public interface PhosaniQolConfig extends Config
 		return HighlightStyle.CLICKBOX;
 	}
 
+	@Alpha
 	@ConfigItem(
-		position = 2,
+		position = 4,
+		keyName = "magicHuskBorderColor",
+		name = " - Border Color",
+		description = "Sets the border color for the magic husk",
+		section = addsSettings
+	)
+	default Color magicHuskBorderColor()
+	{
+		return new Color(0, 225, 255);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 5,
+		keyName = "magicHuskFillColor",
+		name = " - Fill Color",
+		description = "Sets the fill color for the magic husk",
+		section = addsSettings
+	)
+	default Color magicHuskFillColor()
+	{
+		return new Color(0, 225, 255, 30);
+	}
+
+	@ConfigItem(
+		position = 6,
 		keyName = "highlightParasite",
 		name = "Highlight Parasite",
-		description = "Sets the highlight style for parasites",
+		description = "Sets the highlight style for the parasite",
 		section = addsSettings
 	)
 	default HighlightStyle highlightParasite()
@@ -236,8 +285,34 @@ public interface PhosaniQolConfig extends Config
 		return HighlightStyle.CLICKBOX;
 	}
 
+	@Alpha
 	@ConfigItem(
-		position = 3,
+		position = 7,
+		keyName = "parasiteBorderColor",
+		name = " - Border Color",
+		description = "Sets the border color for the parasite",
+		section = addsSettings
+	)
+	default Color parasiteBorderColor()
+	{
+		return new Color(226, 138, 255);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 8,
+		keyName = "parasiteFillColor",
+		name = " - Fill Color",
+		description = "Sets the fill color for the parasite",
+		section = addsSettings
+	)
+	default Color parasiteFillColor()
+	{
+		return new Color(226, 138, 255, 30);
+	}
+
+	@ConfigItem(
+		position = 9,
 		keyName = "highlightSleepwalkers",
 		name = "Highlight Sleepwalkers",
 		description = "Sets the highlight style for sleepwalkers",
@@ -248,42 +323,42 @@ public interface PhosaniQolConfig extends Config
 		return HighlightStyle.CLICKBOX;
 	}
 
-	@ConfigItem(
-		position = 4,
-		keyName = "addsBorderWidth",
-		name = "Border Width",
-		description = "Sets the width of the lines highlighting adds.",
-		section = addsSettings
-	)
-	default double addsBorderWidth()
-	{
-		return 1.0;
-	}
-
 	@Alpha
 	@ConfigItem(
-		position = 5,
-		keyName = "addsBorderColor",
-		name = "Border Color",
-		description = "Sets the border color highlighting adds",
+		position = 10,
+		keyName = "sleepwalkerBorderColor",
+		name = " - Border Color",
+		description = "Sets the border color for sleepwalkers",
 		section = addsSettings
 	)
-	default Color addsBorderColor()
+	default Color sleepwalkerBorderColor()
 	{
 		return new Color(0, 225, 255);
 	}
 
 	@Alpha
 	@ConfigItem(
-		position = 6,
-		keyName = "addsFillColor",
-		name = "Fill Color",
-		description = "Sets the fill color for highlighting adds",
+		position = 11,
+		keyName = "sleepwalkerFillColor",
+		name = " - Fill Color",
+		description = "Sets the fill color for sleepwalkers",
 		section = addsSettings
 	)
-	default Color addsFillColor()
+	default Color sleepwalkerFillColor()
 	{
 		return new Color(0, 225, 255, 30);
+	}
+
+	@ConfigItem(
+		position = 12,
+		keyName = "addsBorderWidth",
+		name = "Border Width",
+		description = "Sets the width of the lines highlighting adds",
+		section = addsSettings
+	)
+	default double addsBorderWidth()
+	{
+		return 1.0;
 	}
 
 	@ConfigSection(
@@ -306,23 +381,11 @@ public interface PhosaniQolConfig extends Config
 		return HighlightStyle.TILE;
 	}
 
-	@ConfigItem(
-		position = 1,
-		keyName = "sporesBorderWidth",
-		name = "Border Width",
-		description = "Sets the width of the lines highlighting spores",
-		section = otherSettings
-	)
-	default double sporesBorderWidth()
-	{
-		return 1.0;
-	}
-
 	@Alpha
 	@ConfigItem(
-		position = 2,
+		position = 1,
 		keyName = "sporesBorderColor",
-		name = "Border Color",
+		name = " - Color",
 		description = "Sets the border color highlighting spores",
 		section = otherSettings
 	)
@@ -333,9 +396,9 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 3,
+		position = 2,
 		keyName = "sporesFillColor",
-		name = "Fill Color",
+		name = " - Fill Color",
 		description = "Sets the fill color highlighting spores",
 		section = otherSettings
 	)
@@ -344,38 +407,15 @@ public interface PhosaniQolConfig extends Config
 		return new Color(255, 255, 0, 30);
 	}
 
-	@Getter
-	@RequiredArgsConstructor
-	enum HighlightStyle
+	@ConfigItem(
+		position = 3,
+		keyName = "sporesBorderWidth",
+		name = " - Border Width",
+		description = "Sets the width of the lines highlighting spores",
+		section = otherSettings
+	)
+	default double sporesBorderWidth()
 	{
-		NONE("None"),
-		TILE("Tile"),
-		HULL("Hull"),
-		OUTLINE("Outline"),
-		CLICKBOX("Clickbox");
-
-		private final String highlightStyle;
-	}
-
-	@Getter
-	@RequiredArgsConstructor
-	enum Fonts
-	{
-		SMALL(FontManager.getRunescapeSmallFont()),
-		REGULAR(FontManager.getRunescapeFont()),
-		BOLD(FontManager.getRunescapeBoldFont());
-
-		private final Font font;
-	}
-
-	@Getter
-	@RequiredArgsConstructor
-	enum OverlayType
-	{
-		NONE("None"),
-		VALUE("Value"),
-		PERCENTAGE("Percentage");
-
-		private final String overlayType;
+		return 1.0;
 	}
 }
