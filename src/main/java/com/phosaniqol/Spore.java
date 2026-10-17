@@ -36,7 +36,7 @@ public class Spore
 
 	public Double getBorderWidth()
 	{
-		return config.sporesBorderWidth();
+		return 1.0;
 	}
 
 	public OverlayType getOverlayType()

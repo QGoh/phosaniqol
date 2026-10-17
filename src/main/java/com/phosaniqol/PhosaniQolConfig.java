@@ -407,6 +407,7 @@ public interface PhosaniQolConfig extends Config
 		return new Color(255, 255, 0, 30);
 	}
 
+	/*
 	@ConfigItem(
 		position = 3,
 		keyName = "sporesBorderWidth",
@@ -418,4 +419,5 @@ public interface PhosaniQolConfig extends Config
 	{
 		return 1.0;
 	}
+	 */
 }
