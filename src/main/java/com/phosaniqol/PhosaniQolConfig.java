@@ -159,9 +159,21 @@ public interface PhosaniQolConfig extends Config
 		return new Color(230, 150, 30);
 	}
 
-	@Alpha
 	@ConfigItem(
 		position = 11,
+		keyName = "totemHudFont",
+		name = " - Font",
+		description = "Sets the font of the totem HUD",
+		section = totemSettings
+	)
+	default FontType totemHudFont()
+	{
+		return FontType.REGULAR;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 12,
 		keyName = "totemHudBarForeground",
 		name = " - Bar Foreground",
 		description = "Sets the bar foreground color of the totem HUD",
@@ -174,7 +186,7 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 12,
+		position = 13,
 		keyName = "totemHudBarBackground",
 		name = " - Bar Background",
 		description = "Sets the bar background color of the totem HUD",
@@ -187,7 +199,7 @@ public interface PhosaniQolConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 13,
+		position = 14,
 		keyName = "totemHudBarFull",
 		name = " - Bar Full",
 		description = "Sets the bar filled color of the totem HUD",
@@ -198,33 +210,8 @@ public interface PhosaniQolConfig extends Config
 		return new Color(255, 255, 255);
 	}
 
-	@Alpha
-	@ConfigItem(
-		position = 14,
-		keyName = "totemHudOutlineColor",
-		name = " - Outline Color",
-		description = "Sets the outline color of the totem HUD",
-		section = totemSettings
-	)
-	default Color totemHudOutlineColor()
-	{
-		return new Color(0, 0, 0);
-	}
-
 	@ConfigItem(
 		position = 15,
-		keyName = "totemHudFont",
-		name = " - Font",
-		description = "Sets the font of the totem HUD",
-		section = totemSettings
-	)
-	default FontType totemHudFont()
-	{
-		return FontType.REGULAR;
-	}
-
-	@ConfigItem(
-		position = 16,
 		keyName = "totemHudBarWidth",
 		name = " - Bar Width",
 		description = "Sets the bar width of the totem HUD",
@@ -236,7 +223,7 @@ public interface PhosaniQolConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 17,
+		position = 16,
 		keyName = "totemHudBarHeight",
 		name = " - Bar Height",
 		description = "Sets the bar height of the totem HUD",
@@ -245,6 +232,32 @@ public interface PhosaniQolConfig extends Config
 	default int totemHudBarHeight()
 	{
 		return 5;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 17,
+		keyName = "totemHudOutlineColor",
+		name = " - Outline Color",
+		description = "Sets the outline color of the totem HUD",
+		section = totemSettings
+	)
+	default Color totemHudOutlineColor()
+	{
+		return new Color(0, 0, 0);
+	}
+
+	@Range(min = 0, max = 5)
+	@ConfigItem(
+		position = 18,
+		keyName = "totemHudOutline",
+		name = " - Outline",
+		description = "Sets the outline width of the totem HUD components",
+		section = totemSettings
+	)
+	default int totemHudOutline()
+	{
+		return 1;
 	}
 
 	@ConfigSection(
@@ -546,44 +559,4 @@ public interface PhosaniQolConfig extends Config
 	{
 		return new Color(255, 255, 0, 30);
 	}
-
-	/*
-	@Alpha
-	@ConfigItem(
-		position = 4,
-		keyName = "totemHudTextColor",
-		name = " - Text Color",
-		description = "Sets the text color for custom totem HUD",
-		section = otherSettings
-	)
-	default Color totemHudOverlayColor()
-	{
-		return new Color(230, 150, 30);
-	}
-
-	@ConfigItem(
-		position = 5,
-		keyName = "totemHudTextFont",
-		name = " - Font",
-		description = "Sets the font for custom totem HUD",
-		section = otherSettings
-	)
-	default FontType totemHudOverlayFont()
-	{
-		return FontType.SMALL;
-	}
-
-	@Range(min = 0, max = 5)
-	@ConfigItem(
-		position = 6,
-		keyName = "totemHudTextOutline",
-		name = " - Text Outline",
-		description = "Sets text outline width for custom totem HUD",
-		section = otherSettings
-	)
-	default int totemHudOverlayOutline()
-	{
-		return 1;
-	}
-	 */
 }

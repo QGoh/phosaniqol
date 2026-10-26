@@ -18,7 +18,6 @@ public class PhosaniQolTotemHud extends Overlay
 {
 	private final int PADDING = 6;
 	private final int TEXT_BAR_GAP = 2;
-	private final int OUTLINE_WIDTH = 1;
 
 	private final PhosaniQolPlugin plugin;
 	private final PhosaniQolConfig config;
@@ -36,8 +35,8 @@ public class PhosaniQolTotemHud extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics2D)
 	{
-		//if (config.totemHud() != TotemHudStyle.CUSTOM) return null;
-		//if (plugin.getTotems().isEmpty()) return null;
+		if (config.totemHud() != TotemHudStyle.CUSTOM) return null;
+		if (plugin.getTotems().isEmpty()) return null;
 
 		Color textColor = config.totemHudTextColor();
 		Color barBackground = config.totemHudBarBackground();
@@ -47,6 +46,7 @@ public class PhosaniQolTotemHud extends Overlay
 		Font font = config.totemHudFont().getFont();
 		int barWidth = config.totemHudBarWidth();
 		int barHeight = config.totemHudBarHeight();
+		int outlineWidth = config.totemHudOutline();
 
 		FontMetrics fontMetrics = graphics2D.getFontMetrics(font);
 		int cellWidth = Math.max(fontMetrics.stringWidth("North West"), barWidth) + PADDING;
@@ -66,13 +66,13 @@ public class PhosaniQolTotemHud extends Overlay
 			int textPadding = ((cellWidth - fontMetrics.stringWidth(name)) / 2);
 			int barPadding = ((cellWidth - barWidth) / 2);
 
-			drawText(graphics2D, font, textColor, OUTLINE_WIDTH, outlineColor, x + textPadding, y, name);
+			drawText(graphics2D, font, textColor, outlineWidth, outlineColor, x + textPadding, y, name);
 
 			graphics2D.setColor(outlineColor);
-			graphics2D.fillRect(x + barPadding - OUTLINE_WIDTH, y + TEXT_BAR_GAP - OUTLINE_WIDTH, barWidth + (OUTLINE_WIDTH * 2), barHeight + (OUTLINE_WIDTH * 2));
+			graphics2D.fillRect(x + barPadding - outlineWidth, y + TEXT_BAR_GAP - outlineWidth, barWidth + (outlineWidth * 2), barHeight + (outlineWidth * 2));
 
 			graphics2D.setColor(barBackground);
-			graphics2D.fillRect(x + barPadding, y + OUTLINE_WIDTH + TEXT_BAR_GAP, barWidth, barHeight);
+			graphics2D.fillRect(x + barPadding, y + outlineWidth + TEXT_BAR_GAP, barWidth, barHeight);
 
 			if (totems.containsKey(npcId) && totems.get(npcId).getHealthPercent() < 1.0)
 			{
