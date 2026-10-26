@@ -78,7 +78,7 @@ public class PhosaniQolOverlay extends Overlay
 
 			if (phosaniNpc.getOverlayType() == OverlayType.PERCENTAGE)
 			{
-				text = phosaniNpc.getHealthPercent() + "%";
+				text = ((int) (phosaniNpc.getHealthPercent() * 100)) + "%";
 			}
 			else
 			{
@@ -86,11 +86,31 @@ public class PhosaniQolOverlay extends Overlay
 			}
 
 			Point textLocation = npc.getCanvasTextLocation(graphics2D, text, textOverlayOffset);
+
 			if (textLocation != null)
 			{
+				int outlineWidth = phosaniNpc.getOverlayOutline();
+				drawText(graphics2D, textOverlayFont, textOverlayColor, outlineWidth, textLocation.getX(), textLocation.getY(), text);
+				/*
 				graphics2D.setFont(textOverlayFont.getFont());
+				if (outlineWidth > 0)
+				{
+
+					graphics2D.setColor(new Color(0, 0, 0, textOverlayColor.getAlpha()));
+					for (int dx = -outlineWidth; dx <= outlineWidth; dx++)
+					{
+						for (int dy = -outlineWidth; dy <= outlineWidth; dy++)
+						{
+							if ((dx != 0 || dy != 0) && dx * dx + dy * dy <= outlineWidth * outlineWidth + 1)
+							{
+								graphics2D.drawString(text, textLocation.getX() + dx, textLocation.getY() + dy);
+							}
+						}
+					}
+				}
 				graphics2D.setColor(textOverlayColor);
 				graphics2D.drawString(text, textLocation.getX(), textLocation.getY());
+				 */
 			}
 		}
 
@@ -197,5 +217,27 @@ public class PhosaniQolOverlay extends Overlay
 				graphics2D.fill(shape);
 			}
 		}
+	}
+
+	private void drawText(Graphics2D graphics2D, FontType fontType, Color color, int outlineWidth, int x, int y, String text)
+	{
+		graphics2D.setFont(fontType.getFont());
+		if (outlineWidth > 0)
+		{
+
+			graphics2D.setColor(new Color(0, 0, 0));
+			for (int dx = -outlineWidth; dx <= outlineWidth; dx++)
+			{
+				for (int dy = -outlineWidth; dy <= outlineWidth; dy++)
+				{
+					if ((dx != 0 || dy != 0) && dx * dx + dy * dy <= outlineWidth * outlineWidth + 1)
+					{
+						graphics2D.drawString(text, x + dx, y + dy);
+					}
+				}
+			}
+		}
+		graphics2D.setColor(color);
+		graphics2D.drawString(text, x, y);
 	}
 }

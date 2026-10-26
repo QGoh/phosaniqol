@@ -12,7 +12,7 @@ public interface PhosaniNpc
 
 	int getHealthValue();
 
-	int getHealthPercent();
+	double getHealthPercent();
 
 	HighlightStyle getHighlightStyle();
 
@@ -29,4 +29,6 @@ public interface PhosaniNpc
 	int getOverlayOffset();
 
 	Color getOverlayColor();
+
+	int getOverlayOutline();
 }

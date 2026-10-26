@@ -15,14 +15,14 @@ public class PhosaniBoss implements PhosaniNpc
 {
 	private NPC npc;
 	private int currentHealth;
-	private int maxHealth;
+	private int totalHealth;
 	private PhosaniQolConfig config;
 
-	public PhosaniBoss(NPC npc, int currentHealth, int maxHealth, PhosaniQolConfig config)
+	public PhosaniBoss(NPC npc, int currentHealth, int totalHealth, PhosaniQolConfig config)
 	{
 		this.npc = npc;
 		this.currentHealth = currentHealth;
-		this.maxHealth = maxHealth;
+		this.totalHealth = totalHealth;
 		this.config = config;
 	}
 
@@ -31,9 +31,9 @@ public class PhosaniBoss implements PhosaniNpc
 		return this.currentHealth;
 	}
 
-	public int getHealthPercent()
+	public double getHealthPercent()
 	{
-		return (int) ((double) this.currentHealth / this.maxHealth * 100);
+		return (double) currentHealth / totalHealth;
 	}
 
 	public HighlightStyle getHighlightStyle()
@@ -74,5 +74,10 @@ public class PhosaniBoss implements PhosaniNpc
 	public FontType getOverlayFont()
 	{
 		return config.phosaniShieldOverlayFont();
+	}
+
+	public int getOverlayOutline()
+	{
+		return config.phosaniShieldOverlayOutline();
 	}
 }

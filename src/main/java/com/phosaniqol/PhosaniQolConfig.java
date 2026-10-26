@@ -7,6 +7,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.FontType;
+import net.runelite.client.config.Range;
 
 @ConfigGroup(PhosaniQolConfig.CONFIG_GROUP)
 public interface PhosaniQolConfig extends Config
@@ -120,6 +121,96 @@ public interface PhosaniQolConfig extends Config
 		return FontType.REGULAR;
 	}
 
+	@Range(min = 0, max = 5)
+	@ConfigItem(
+		position = 8,
+		keyName = "totemChargeOverlayOutline",
+		name = " - Outline",
+		description = "Sets the width of the outline around totem charge overlay",
+		section = totemSettings
+	)
+	default int totemChargeOverlayOutline()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+		position = 9,
+		keyName = "totemHud",
+		name = "Totem HUD",
+		description = "Sets the display style of the totem HUD",
+		section = totemSettings
+	)
+	default TotemHudStyle totemHud()
+	{
+		return TotemHudStyle.DEFAULT;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 10,
+		keyName = "totemHudTextColor",
+		name = " - Text Color",
+		description = "Sets the text color of the totem HUD",
+		section = totemSettings
+	)
+	default Color totemHudTextColor()
+	{
+		return new Color(230, 150, 30);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 11,
+		keyName = "totemHudBarForeground",
+		name = " - Bar Foreground",
+		description = "Sets the bar foreground color of the totem HUD",
+		section = totemSettings
+	)
+	default Color totemHudBarForeground()
+	{
+		return new Color(255, 255, 0);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 12,
+		keyName = "totemHudBarBackground",
+		name = " - Bar Background",
+		description = "Sets the bar background color of the totem HUD",
+		section = totemSettings
+	)
+	default Color totemHudBarBackground()
+	{
+		return new Color(45, 45, 0);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 13,
+		keyName = "totemHudBarFull",
+		name = " - Bar Full",
+		description = "Sets the bar filled color of the totem HUD",
+		section = totemSettings
+	)
+	default Color totemHudBarFull()
+	{
+		return new Color(255, 255, 255);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 14,
+		keyName = "totemHudOutlineColor",
+		name = " - Outline Color",
+		description = "Sets the outline color of the totem HUD",
+		section = totemSettings
+	)
+	default Color totemHudOutlineColor()
+	{
+		return new Color(0, 0, 0);
+	}
+
 	@ConfigSection(
 		position = 1,
 		name = "Boss Settings",
@@ -177,8 +268,21 @@ public interface PhosaniQolConfig extends Config
 		return FontType.REGULAR;
 	}
 
+	@Range(min = 0, max = 5)
 	@ConfigItem(
 		position = 4,
+		keyName = "phosaniShieldeOverlayOutline",
+		name = " - Outline",
+		description = "Sets the width of the outline around Phosani's shield overlay",
+		section = bossSettings
+	)
+	default int phosaniShieldOverlayOutline()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+		position = 5,
 		keyName = "hideHealthOverlay",
 		name = "Hide Jagex HP HUD",
 		description = "Force hides the in-game boss HP HUD",
@@ -408,16 +512,42 @@ public interface PhosaniQolConfig extends Config
 	}
 
 	/*
+	@Alpha
 	@ConfigItem(
-		position = 3,
-		keyName = "sporesBorderWidth",
-		name = " - Border Width",
-		description = "Sets the width of the lines highlighting spores",
+		position = 4,
+		keyName = "totemHudTextColor",
+		name = " - Text Color",
+		description = "Sets the text color for custom totem HUD",
 		section = otherSettings
 	)
-	default double sporesBorderWidth()
+	default Color totemHudOverlayColor()
 	{
-		return 1.0;
+		return new Color(230, 150, 30);
+	}
+
+	@ConfigItem(
+		position = 5,
+		keyName = "totemHudTextFont",
+		name = " - Font",
+		description = "Sets the font for custom totem HUD",
+		section = otherSettings
+	)
+	default FontType totemHudOverlayFont()
+	{
+		return FontType.SMALL;
+	}
+
+	@Range(min = 0, max = 5)
+	@ConfigItem(
+		position = 6,
+		keyName = "totemHudTextOutline",
+		name = " - Text Outline",
+		description = "Sets text outline width for custom totem HUD",
+		section = otherSettings
+	)
+	default int totemHudOverlayOutline()
+	{
+		return 1;
 	}
 	 */
 }

@@ -36,9 +36,9 @@ public class PhosaniTotem implements PhosaniNpc
 		return currentCharge;
 	}
 
-	public int getHealthPercent()
+	public double getHealthPercent()
 	{
-		return (int) ((double) currentCharge / maxCharge * 100);
+		return (double) currentCharge / maxCharge;
 	}
 
 	public HighlightStyle getHighlightStyle()
@@ -79,6 +79,11 @@ public class PhosaniTotem implements PhosaniNpc
 	public FontType getOverlayFont()
 	{
 		return config.totemChargeOverlayFont();
+	}
+
+	public int getOverlayOutline()
+	{
+		return config.totemChargeOverlayOutline();
 	}
 
 	public void addHit(int expireTick, int hit)

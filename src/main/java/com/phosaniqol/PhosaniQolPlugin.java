@@ -1,5 +1,6 @@
 package com.phosaniqol;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import com.phosaniqol.npcs.MagicHusk;
@@ -44,6 +45,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.NPCManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.api.GameObject;
 import net.runelite.api.events.GameObjectSpawned;
@@ -53,30 +55,29 @@ import net.runelite.api.events.GameObjectDespawned;
 @PluginDescriptor(name = "Phosani QoL")
 public class PhosaniQolPlugin extends Plugin
 {
-	// 1 = SW, 2 = SW, 3 = NW, 4 = NE
-	private final Set<Integer> dormantTotems = ImmutableSet.of(
+	// 1 = SW, 2 = SE, 3 = NW, 4 = NE
+	private static final Set<Integer> TOTEMS_DORMANT = ImmutableSet.of(
 		NpcID.NIGHTMARE_TOTEM_1_DORMANT,
 		NpcID.NIGHTMARE_TOTEM_2_DORMANT,
 		NpcID.NIGHTMARE_TOTEM_3_DORMANT,
 		NpcID.NIGHTMARE_TOTEM_4_DORMANT
 	);
 
-	@Getter
-	private final Set<Integer> readyTotems = ImmutableSet.of(
-		NpcID.NIGHTMARE_TOTEM_1_READY,
-		NpcID.NIGHTMARE_TOTEM_2_READY,
-		NpcID.NIGHTMARE_TOTEM_3_READY,
-		NpcID.NIGHTMARE_TOTEM_4_READY
+	public static final ImmutableMap<Integer, String> TOTEMS_READY = ImmutableMap.of(
+		NpcID.NIGHTMARE_TOTEM_3_READY, "North West",
+		NpcID.NIGHTMARE_TOTEM_4_READY, "North East",
+		NpcID.NIGHTMARE_TOTEM_1_READY, "South West",
+		NpcID.NIGHTMARE_TOTEM_2_READY, "South East"
 	);
 
-	private final Set<Integer> chargedTotems = ImmutableSet.of(
+	private static final Set<Integer> TOTEMS_CHARGED = ImmutableSet.of(
 		NpcID.NIGHTMARE_TOTEM_1_CHARGED,
 		NpcID.NIGHTMARE_TOTEM_2_CHARGED,
 		NpcID.NIGHTMARE_TOTEM_3_CHARGED,
 		NpcID.NIGHTMARE_TOTEM_4_CHARGED
 	);
 
-	private final Set<Integer> phosaniAlivePhases = ImmutableSet.of(
+	private static final Set<Integer> PHOSANI_ACTIVE = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_01,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_02,
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_03,
@@ -88,14 +89,14 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_CHALLENGE_PHASE_05
 	);
 
-	private final Set<Integer> phosaniDeadPhases = ImmutableSet.of(
+	private static final Set<Integer> PHOSANI_INACTIVE = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_INITIAL,
 		NpcID.NIGHTMARE_CHALLENGE_DYING,
 		NpcID.NIGHTMARE_CHALLENGE_DEAD,
 		NpcID.NIGHTMARE_CHALLENGE_BLAST
 	);
 
-	private final Set<Integer> phosaniAdds = ImmutableSet.of(
+	private static final Set<Integer> PHOSANI_ADDS = ImmutableSet.of(
 		NpcID.NIGHTMARE_CHALLENGE_PARASITE,
 		NpcID.NIGHTMARE_CHALLENGE_PARASITE_WEAK,
 		NpcID.NIGHTMARE_CHALLENGE_HUSK_RANGED,
@@ -103,8 +104,7 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_CHALLENGE_SLEEPWALKER
 	);
 
-	private final int HPBAR_HUD = 6099;
-
+	private static final int HPBAR_HUD = 6099;
 	private static final int SPORE_GROWING_ID = 37738;
 	private static final int SPORE_OBJECT_ID = 37739;
 
@@ -129,6 +129,9 @@ public class PhosaniQolPlugin extends Plugin
 	@Inject
 	private PhosaniQolOverlay overlay;
 
+	@Inject
+	private PhosaniQolTotemHud totemHud;
+
 	@Getter
 	private final Map<Integer, PhosaniTotem> totems = new HashMap<>();
 	@Getter
@@ -144,12 +147,14 @@ public class PhosaniQolPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(overlay);
+		overlayManager.add(totemHud);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
 		overlayManager.remove(overlay);
+		overlayManager.remove(totemHud);
 		clearAll();
 	}
 
@@ -159,6 +164,13 @@ public class PhosaniQolPlugin extends Plugin
 		if (event.getGameState() != GameState.LOGGED_IN)
 		{
 			clearAll();
+			overlayManager.remove(overlay);
+			overlayManager.remove(totemHud);
+		}
+		else
+		{
+			overlayManager.add(overlay);
+			overlayManager.add(totemHud);
 		}
 	}
 
@@ -178,7 +190,7 @@ public class PhosaniQolPlugin extends Plugin
 			if (target instanceof NPC)
 			{
 				int npcId = ((NPC) target).getId();
-				if (!readyTotems.contains(npcId)) return;
+				if (!TOTEMS_READY.containsKey(npcId)) return;
 
 				PhosaniTotem targetTotem = totems.get(npcId);
 
@@ -268,7 +280,7 @@ public class PhosaniQolPlugin extends Plugin
 				//int hitsplatType = event.getHitsplat().getHitsplatType();
 				//int hitsplatAmount = event.getHitsplat().getAmount();
 
-				if (!readyTotems.contains(npcId)) return;
+				if (!TOTEMS_READY.containsKey(npcId)) return;
 
 				totems.get(npcId).recalculateCharge(hitsplatTick);
 			}
@@ -297,15 +309,15 @@ public class PhosaniQolPlugin extends Plugin
 		int oldNpcId = oldNpc.getId();
 		int newNpcId = newNpc.getId();
 
-		if (readyTotems.contains(newNpcId))
+		if (TOTEMS_READY.containsKey(newNpcId))
 		{
 			totems.put(newNpcId, new PhosaniTotem(newNpc, 0, 200, config));
 		}
-		else if (chargedTotems.contains(newNpcId))
+		else if (TOTEMS_CHARGED.contains(newNpcId))
 		{
 			totems.remove(oldNpcId);
 		}
-		else if (phosaniAlivePhases.contains(newNpcId))
+		else if (PHOSANI_ACTIVE.contains(newNpcId))
 		{
 			if (newNpcId == NpcID.NIGHTMARE_CHALLENGE_PHASE_05)
 			{
@@ -316,7 +328,7 @@ public class PhosaniQolPlugin extends Plugin
 				phosaniBoss = new PhosaniBoss(newNpc, 400, 400, config);
 			}
 		}
-		else if (phosaniDeadPhases.contains(newNpcId) || phosaniAlivePhases.contains(oldNpcId))
+		else if (PHOSANI_INACTIVE.contains(newNpcId) || PHOSANI_ACTIVE.contains(oldNpcId))
 		{
 			phosaniBoss = null;
 		}
@@ -346,7 +358,7 @@ public class PhosaniQolPlugin extends Plugin
 		{
 			adds.put(key, new Sleepwalker(npc, config));
 		}
-		else if (phosaniDeadPhases.contains(npcId))
+		else if (PHOSANI_INACTIVE.contains(npcId))
 		{
 			phosaniBoss = null;
 		}
@@ -355,10 +367,10 @@ public class PhosaniQolPlugin extends Plugin
 	@Subscribe
 	public void onNpcDespawned(NpcDespawned event)
 	{
-		NPC npc = event.getNpc();
-		int npcId = npc.getId();
-		if (phosaniAdds.contains(npcId))
+		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1)
 		{
+			NPC npc = event.getNpc();
+			int npcId = npc.getId();
 			int index = npc.getIndex();
 			int key = -(npcId + index);
 			adds.remove(key);
@@ -370,10 +382,16 @@ public class PhosaniQolPlugin extends Plugin
 	{
 		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1)
 		{
-			Widget healthBar = client.getWidget(InterfaceID.HpbarHud.HP);
-			if (healthBar != null)
+			Widget healthBarWidget = client.getWidget(InterfaceID.HpbarHud.HP);
+			if (healthBarWidget != null)
 			{
-				healthBar.setHidden(config.hideHealthOverlay());
+				healthBarWidget.setHidden(config.hideHealthOverlay());
+			}
+
+			Widget totemHudWidget = client.getWidget(InterfaceID.NightmareTotems.TOTEMS);
+			if (totemHudWidget != null && config.totemHud() != TotemHudStyle.DEFAULT)
+			{
+				totemHudWidget.setHidden(true);
 			}
 		}
 	}
@@ -381,27 +399,35 @@ public class PhosaniQolPlugin extends Plugin
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
-		GameObject object = event.getGameObject();
-
-		if (object.getId() == SPORE_GROWING_ID || object.getId() == SPORE_OBJECT_ID)
+		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1)
 		{
-			spores.add(new Spore(object, config));
+			GameObject object = event.getGameObject();
+
+			if (object.getId() == SPORE_GROWING_ID || object.getId() == SPORE_OBJECT_ID)
+			{
+				spores.add(new Spore(object, config));
+			}
 		}
 	}
 
 	@Subscribe
 	public void onGameObjectDespawned(GameObjectDespawned event)
 	{
-		GameObject object = event.getGameObject();
-		spores.removeIf(spore -> spore.getGameObject() == object);
+
+		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1)
+		{
+			GameObject object = event.getGameObject();
+			spores.removeIf(spore -> spore.getGameObject() == object);
+		}
 	}
 
 	private void clearAll()
 	{
 		totems.clear();
 		phosaniBoss = null;
-		xpDrops.clear();
+		adds.clear();
 		spores.clear();
+		xpDrops.clear();
 	}
 
 	@Provides

@@ -22,6 +22,8 @@ public class MagicHusk implements PhosaniNpc
 	{
 		this.npc = npc;
 		this.config = config;
+		this.currentHealth = npc.getComposition().getStats()[3];
+		this.totalHealth = this.currentHealth;
 	}
 
 	public int getHealthValue()
@@ -29,9 +31,9 @@ public class MagicHusk implements PhosaniNpc
 		return this.currentHealth;
 	}
 
-	public int getHealthPercent()
+	public double getHealthPercent()
 	{
-		return (int) ((double) this.currentHealth / this.totalHealth * 100);
+		return (double) currentHealth / totalHealth;
 	}
 
 	public HighlightStyle getHighlightStyle()
@@ -72,5 +74,10 @@ public class MagicHusk implements PhosaniNpc
 	public FontType getOverlayFont()
 	{
 		return FontType.REGULAR;
+	}
+
+	public int getOverlayOutline()
+	{
+		return 0;
 	}
 }
