@@ -211,6 +211,42 @@ public interface PhosaniQolConfig extends Config
 		return new Color(0, 0, 0);
 	}
 
+	@ConfigItem(
+		position = 15,
+		keyName = "totemHudFont",
+		name = " - Font",
+		description = "Sets the font of the totem HUD",
+		section = totemSettings
+	)
+	default FontType totemHudFont()
+	{
+		return FontType.REGULAR;
+	}
+
+	@ConfigItem(
+		position = 16,
+		keyName = "totemHudBarWidth",
+		name = " - Bar Width",
+		description = "Sets the bar width of the totem HUD",
+		section = totemSettings
+	)
+	default int totemHudBarWidth()
+	{
+		return 60;
+	}
+
+	@ConfigItem(
+		position = 17,
+		keyName = "totemHudBarHeight",
+		name = " - Bar Height",
+		description = "Sets the bar height of the totem HUD",
+		section = totemSettings
+	)
+	default int totemHudBarHeight()
+	{
+		return 5;
+	}
+
 	@ConfigSection(
 		position = 1,
 		name = "Boss Settings",
