@@ -210,6 +210,7 @@ public interface PhosaniQolConfig extends Config
 		return new Color(255, 255, 255);
 	}
 
+	@Range(min = 1)
 	@ConfigItem(
 		position = 15,
 		keyName = "totemHudBarWidth",
@@ -222,6 +223,7 @@ public interface PhosaniQolConfig extends Config
 		return 60;
 	}
 
+	@Range(min = 1)
 	@ConfigItem(
 		position = 16,
 		keyName = "totemHudBarHeight",

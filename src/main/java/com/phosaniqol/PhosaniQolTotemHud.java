@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,7 @@ public class PhosaniQolTotemHud extends Overlay
 			graphics2D.fillRect(x + barPadding - outlineWidth, y + TEXT_BAR_GAP - outlineWidth, barWidth + (outlineWidth * 2), barHeight + (outlineWidth * 2));
 
 			graphics2D.setColor(barBackground);
-			graphics2D.fillRect(x + barPadding, y + outlineWidth + TEXT_BAR_GAP, barWidth, barHeight);
+			graphics2D.fillRect(x + barPadding, y + TEXT_BAR_GAP, barWidth, barHeight);
 
 			if (totems.containsKey(npcId) && totems.get(npcId).getHealthPercent() < 1.0)
 			{
@@ -84,6 +85,7 @@ public class PhosaniQolTotemHud extends Overlay
 				graphics2D.setColor(barFull);
 				graphics2D.fillRect(x + barPadding, y + TEXT_BAR_GAP, barWidth, barHeight);
 			}
+
 			corner += 1;
 		}
 
